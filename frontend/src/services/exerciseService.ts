@@ -1,5 +1,5 @@
 import api from './api';
-import { Exercise, PaginatedResponse, PaginationParams } from '../types';
+import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest, UpdateExerciseRequest } from '../types';
 
 export const exerciseService = {
   // Get exercises
@@ -36,5 +36,28 @@ export const exerciseService = {
   // Remove from favorites
   removeFromFavorites: async (exerciseId: string): Promise<void> => {
     await api.delete<{ success: boolean; message: string }>(`/exercises/favorites/${exerciseId}`);
+  },
+
+  // Create exercise
+  createExercise: async (exerciseData: CreateExerciseRequest): Promise<Exercise> => {
+    const response = await api.post<{ success: boolean; data: Exercise }>('/exercises', exerciseData);
+    return response.data.data;
+  },
+
+  // Update exercise
+  updateExercise: async (id: string, exerciseData: Partial<CreateExerciseRequest>): Promise<Exercise> => {
+    const response = await api.put<{ success: boolean; data: Exercise }>(`/exercises/${id}`, exerciseData);
+    return response.data.data;
+  },
+
+  // Delete exercise
+  deleteExercise: async (id: string): Promise<void> => {
+    await api.delete<{ success: boolean; message: string }>(`/exercises/${id}`);
+  },
+
+  // Get exercise templates
+  getExerciseTemplates: async (): Promise<Exercise[]> => {
+    const response = await api.get<{ success: boolean; data: Exercise[] }>('/exercises/templates');
+    return response.data.data;
   }
 };

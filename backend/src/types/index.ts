@@ -54,8 +54,8 @@ export interface UpdateTrainingGroupRequest extends Partial<CreateTrainingGroupR
 
 // Exercise Session types
 export interface CreateExerciseSessionRequest {
-  name: string;
   sessionDate: string;
+  startTime?: Date;
   notes?: string;
 }
 
@@ -83,6 +83,39 @@ export interface BasicExercise {
   equipment?: string;
   difficultyLevel?: string;
   category?: string;
+}
+
+export interface CreateExerciseRequest {
+  name: string;
+  nameZh?: string;
+  description?: string;
+  descriptionZh?: string;
+  instructions?: string[];
+  instructionsZh?: string[];
+  muscleGroups: string[];
+  equipment?: string;
+  difficultyLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  category?: string;
+  images?: any;
+  videos?: any;
+  gifUrl?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+}
+
+export interface UpdateExerciseRequest extends Partial<CreateExerciseRequest> {
+  id: string;
+}
+
+export interface ExerciseSearchParams extends PaginationParams {
+  search?: string;
+  muscleGroup?: string;
+  equipment?: string;
+  difficulty?: string;
+  category?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+  createdBy?: string;
 }
 
 // Pagination types

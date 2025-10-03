@@ -17,6 +17,7 @@ export const createTrainingGroup = async (req: Request, res: Response): Promise<
         success: false,
         error: 'Exercise not found'
       });
+      return;
     }
 
     // Create training group

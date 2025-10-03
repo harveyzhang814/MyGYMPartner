@@ -55,6 +55,52 @@ export interface Exercise {
   images?: any;
   videos?: any;
   gifUrl?: string;
+  createdBy?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+  usageCount?: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  creator?: {
+    id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  };
+}
+
+export interface CreateExerciseRequest {
+  name: string;
+  nameZh?: string;
+  description?: string;
+  descriptionZh?: string;
+  instructions?: string[];
+  instructionsZh?: string[];
+  muscleGroups: string[];
+  equipment?: string;
+  difficultyLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  category?: string;
+  images?: any;
+  videos?: any;
+  gifUrl?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+}
+
+export interface UpdateExerciseRequest extends Partial<CreateExerciseRequest> {
+  id: string;
+}
+
+export interface ExerciseSearchParams extends PaginationParams {
+  search?: string;
+  muscleGroup?: string;
+  equipment?: string;
+  difficulty?: string;
+  category?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+  createdBy?: string;
 }
 
 // Training Group types

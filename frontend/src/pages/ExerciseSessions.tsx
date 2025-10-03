@@ -96,7 +96,7 @@ const ExerciseSessions: React.FC = () => {
                     <Button 
                       type="text" 
                       icon={<PlayCircleOutlined />}
-                      onClick={() => navigate(`/exercise-sessions/${session.id}/continue`)}
+                      onClick={() => navigate(`/exercise-sessions/${session.id}/edit`)}
                     >
                       继续训练
                     </Button>

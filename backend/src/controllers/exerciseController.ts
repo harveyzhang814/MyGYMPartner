@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../index';
 import { basicExercises } from '../utils/basicExercises';
+import { CreateExerciseRequest, UpdateExerciseRequest } from '../types';
 
 export const getExercises = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -106,6 +107,7 @@ export const getExercise = async (req: Request, res: Response): Promise<void> =>
         success: false,
         error: 'Exercise not found'
       });
+      return;
     }
 
     res.json({
@@ -175,6 +177,7 @@ export const addFavoriteExercise = async (req: Request, res: Response): Promise<
         success: false,
         error: 'Exercise not found'
       });
+      return;
     }
 
     // Check if already favorited
@@ -192,6 +195,7 @@ export const addFavoriteExercise = async (req: Request, res: Response): Promise<
         success: false,
         error: 'Exercise already in favorites'
       });
+      return;
     }
 
     // Add to favorites
@@ -233,6 +237,7 @@ export const removeFavoriteExercise = async (req: Request, res: Response): Promi
         success: false,
         error: 'Favorite exercise not found'
       });
+      return;
     }
 
     res.json({
@@ -244,6 +249,203 @@ export const removeFavoriteExercise = async (req: Request, res: Response): Promi
     res.status(500).json({
       success: false,
       error: 'Internal server error'
+    });
+  }
+};
+
+// 创建动作
+export const createExercise = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+    const exerciseData: CreateExerciseRequest = req.body;
+
+    const exercise = await prisma.exercise.create({
+      data: {
+        ...exerciseData,
+        createdBy: userId,
+        instructions: exerciseData.instructions || [],
+        instructionsZh: exerciseData.instructionsZh || []
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      data: exercise,
+      message: 'Exercise created successfully'
+    });
+  } catch (error) {
+    console.error('Create exercise error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create exercise'
+    });
+  }
+};
+
+// 更新动作
+export const updateExercise = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+    const exerciseData: Partial<CreateExerciseRequest> = req.body;
+
+    // Check if exercise exists
+    const existingExercise = await prisma.exercise.findUnique({
+      where: { id }
+    });
+
+    if (!existingExercise) {
+      res.status(404).json({
+        success: false,
+        error: 'Exercise not found'
+      });
+      return;
+    }
+
+    // Check if user has permission to update (creator or admin)
+    if (existingExercise.createdBy !== userId) {
+      res.status(403).json({
+        success: false,
+        error: 'Permission denied'
+      });
+      return;
+    }
+
+    const exercise = await prisma.exercise.update({
+      where: { id },
+      data: {
+        ...exerciseData,
+        instructions: exerciseData.instructions || existingExercise.instructions,
+        instructionsZh: exerciseData.instructionsZh || existingExercise.instructionsZh
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      data: exercise,
+      message: 'Exercise updated successfully'
+    });
+  } catch (error) {
+    console.error('Update exercise error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update exercise'
+    });
+  }
+};
+
+// 删除动作
+export const deleteExercise = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+
+    // Check if exercise exists
+    const existingExercise = await prisma.exercise.findUnique({
+      where: { id },
+      include: {
+        trainingGroups: true,
+        exerciseRecords: true
+      }
+    });
+
+    if (!existingExercise) {
+      res.status(404).json({
+        success: false,
+        error: 'Exercise not found'
+      });
+      return;
+    }
+
+    // Check if user has permission to delete (creator or admin)
+    if (existingExercise.createdBy !== userId) {
+      res.status(403).json({
+        success: false,
+        error: 'Permission denied'
+      });
+      return;
+    }
+
+    // Check if exercise is being used
+    if (existingExercise.trainingGroups.length > 0 || existingExercise.exerciseRecords.length > 0) {
+      res.status(400).json({
+        success: false,
+        error: 'Cannot delete exercise that is being used in training groups or records'
+      });
+      return;
+    }
+
+    await prisma.exercise.delete({
+      where: { id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Exercise deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete exercise error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete exercise'
+    });
+  }
+};
+
+// 获取动作模板
+export const getExerciseTemplates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const exercises = await prisma.exercise.findMany({
+      where: {
+        isTemplate: true,
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        nameZh: true,
+        description: true,
+        descriptionZh: true,
+        muscleGroups: true,
+        equipment: true,
+        difficultyLevel: true,
+        category: true,
+        images: true,
+        gifUrl: true,
+        usageCount: true
+      },
+      orderBy: { usageCount: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      data: exercises
+    });
+  } catch (error) {
+    console.error('Get exercise templates error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get exercise templates'
     });
   }
 };

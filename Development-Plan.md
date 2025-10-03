@@ -58,7 +58,7 @@ npm install axios
 ```sql
 -- 创建基础表结构
 -- 1. users表
--- 2. exercises表（简化版）
+-- 2. exercises表（用户自维护）
 -- 3. training_groups表
 -- 4. exercise_sessions表
 -- 5. exercise_records表
@@ -110,16 +110,27 @@ describe('User Registration', () => {
 - [ ] 训练组编辑功能
 - [ ] 基础动作选择器（硬编码几个常用动作）
 
-#### 简化版动作库
+#### 基础动作库管理
 ```javascript
-// 硬编码常用动作，后续集成exercisedb-api
-const basicExercises = [
-  { id: 1, name: '卧推', muscleGroups: ['chest', 'triceps'] },
-  { id: 2, name: '深蹲', muscleGroups: ['legs', 'glutes'] },
-  { id: 3, name: '硬拉', muscleGroups: ['back', 'legs'] },
-  { id: 4, name: '引体向上', muscleGroups: ['back', 'biceps'] },
-  { id: 5, name: '推举', muscleGroups: ['shoulders', 'triceps'] }
-];
+// 用户可创建和管理动作库
+const exerciseManagement = {
+  // 创建动作
+  createExercise: (exerciseData) => {
+    // 包含：名称、描述、肌肉群、设备、难度等
+  },
+  // 获取动作列表
+  getExercises: (filters) => {
+    // 支持按肌肉群、设备、难度筛选
+  },
+  // 更新动作
+  updateExercise: (id, data) => {
+    // 修改动作信息
+  },
+  // 删除动作
+  deleteExercise: (id) => {
+    // 检查是否被训练组使用
+  }
+};
 ```
 
 ### 2.5 基础训练记录（第3-4周）
@@ -204,19 +215,22 @@ describe('Exercise Recording', () => {
 - [ ] 计划拖拽功能
 - [ ] 日期选择器
 
-### 3.4 动作库集成（第7-8周）
+### 3.4 动作库管理（第7-8周）
 
 #### 后端API开发
-- [ ] exercisedb-api集成
-- [ ] 动作数据同步
-- [ ] 动作搜索接口
+- [ ] 动作CRUD接口
+- [ ] 动作搜索和筛选接口
+- [ ] 动作模板管理
 - [ ] 用户收藏功能
+- [ ] 动作使用统计
 
 #### 前端页面开发
-- [ ] 动作库页面
-- [ ] 动作搜索功能
+- [ ] 动作库管理页面
+- [ ] 创建/编辑动作表单
+- [ ] 动作搜索和筛选功能
 - [ ] 动作详情页面
 - [ ] 收藏功能
+- [ ] 动作模板功能
 
 ### 3.5 数据统计（第8周）
 
@@ -412,8 +426,8 @@ npx prisma studio
 ## 10. 风险控制
 
 ### 10.1 技术风险
-- **API依赖风险**：exercisedb-api可用性
-  - 缓解措施：本地缓存、备用数据源
+- **数据一致性风险**：动作库数据的完整性和一致性
+  - 缓解措施：数据验证、关联检查、软删除
 - **性能风险**：数据库查询性能
   - 缓解措施：索引优化、查询优化
 - **兼容性风险**：浏览器兼容性
@@ -452,7 +466,7 @@ npx prisma studio
 ### 12.2 Phase 2 里程碑（第8周末）
 - [ ] 训练计划管理完成
 - [ ] 日程管理完成
-- [ ] 动作库集成完成
+- [ ] 动作库管理完成
 - [ ] 数据统计完成
 
 ### 12.3 Phase 3 里程碑（第10周末）

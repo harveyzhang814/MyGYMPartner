@@ -9,9 +9,11 @@ export const createExerciseSession = async (req: Request, res: Response): Promis
 
     const session = await prisma.exerciseSession.create({
       data: {
-        ...sessionData,
-        userId,
-        sessionDate: new Date(sessionData.sessionDate)
+        name: `训练记录 ${new Date().toLocaleDateString()}`, // 自动生成名称
+        sessionDate: new Date(sessionData.sessionDate),
+        startTime: sessionData.startTime,
+        notes: sessionData.notes,
+        userId
       },
       include: {
         exerciseRecords: {

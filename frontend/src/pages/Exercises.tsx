@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Input, Select, Button, Typography, Space, Tag, message } from 'antd';
-import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Input, Select, Button, Typography, Space, Tag, message, Popconfirm } from 'antd';
+import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
-import { fetchExercises, addToFavorites, removeFromFavorites } from '../store/slices/exerciseSlice';
+import { fetchExercises, addToFavorites, removeFromFavorites, deleteExercise } from '../store/slices/exerciseSlice';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
 const Exercises: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { exercises, favoriteExercises, loading } = useSelector((state: RootState) => state.exercises);
   
@@ -49,6 +51,15 @@ const Exercises: React.FC = () => {
     return favoriteExercises.some(fav => fav.id === exerciseId);
   };
 
+  const handleDeleteExercise = async (exerciseId: string) => {
+    try {
+      await dispatch(deleteExercise(exerciseId)).unwrap();
+      message.success('动作删除成功');
+    } catch (error: any) {
+      message.error(error.message || '删除失败，请重试');
+    }
+  };
+
   const muscleGroups = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core'];
   const equipmentTypes = ['barbell', 'dumbbell', 'bodyweight', 'machine', 'cable'];
   const difficultyLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
@@ -56,8 +67,20 @@ const Exercises: React.FC = () => {
   return (
     <div>
       <div className="page-header">
-        <Title level={2} className="page-title">动作库</Title>
-        <Text className="page-description">浏览和收藏健身动作</Text>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <Title level={2} className="page-title">动作库</Title>
+            <Text className="page-description">浏览、创建和管理健身动作</Text>
+          </div>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/exercises/create')}
+            size="large"
+          >
+            创建动作
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -183,7 +206,29 @@ const Exercises: React.FC = () => {
                     style={{ color: isFavorite(exercise.id) ? '#faad14' : undefined }}
                   >
                     {isFavorite(exercise.id) ? '已收藏' : '收藏'}
-                  </Button>
+                  </Button>,
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
+                  >
+                    编辑
+                  </Button>,
+                  <Popconfirm
+                    title="确定要删除这个动作吗？"
+                    description="删除后无法恢复，请确认。"
+                    onConfirm={() => handleDeleteExercise(exercise.id)}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                    >
+                      删除
+                    </Button>
+                  </Popconfirm>
                 ]}
               >
                 <div className="exercise-info">

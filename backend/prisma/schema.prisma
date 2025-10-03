@@ -35,13 +35,13 @@ model User {
   trainingGroups TrainingGroup[]
   exerciseSessions ExerciseSession[]
   userFavoriteExercises UserFavoriteExercise[]
+  createdExercises Exercise[]
 
   @@map("users")
 }
 
 model Exercise {
   id              String   @id @default(uuid())
-  externalId      String?  @unique @map("external_id")
   name            String
   nameZh          String?  @map("name_zh")
   description     String?
@@ -55,13 +55,17 @@ model Exercise {
   images          Json?
   videos          Json?
   gifUrl          String?  @map("gif_url")
+  createdBy       String?  @map("created_by")
+  isTemplate      Boolean  @default(false) @map("is_template")
+  isPublic        Boolean  @default(true) @map("is_public")
+  usageCount      Int      @default(0) @map("usage_count")
   isActive        Boolean  @default(true) @map("is_active")
-  lastSyncedAt    DateTime @default(now()) @map("last_synced_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
-  trainingGroups TrainingGroup[]
+  creator         User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  trainingGroups  TrainingGroup[]
   exerciseRecords ExerciseRecord[]
   userFavoriteExercises UserFavoriteExercise[]
 
