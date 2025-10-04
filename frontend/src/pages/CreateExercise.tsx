@@ -6,9 +6,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { createExercise, updateExercise, fetchExercise } from '../store/slices/exerciseSlice';
 import { CreateExerciseRequest } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getPresetOptions } from '../locales';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
+// const { Option } = Select; // Not used in this component
 const { TextArea } = Input;
 
 interface ExerciseForm {
@@ -34,18 +36,20 @@ const CreateExercise: React.FC = () => {
   const [form] = Form.useForm();
   const [instructions, setInstructions] = useState<string[]>(['']);
   const [instructionsZh, setInstructionsZh] = useState<string[]>(['']);
+  const { t } = useLanguage();
 
-  const isEditMode = Boolean(id);
+  const isEditMode = Boolean(id) && window.location.pathname.includes('/edit');
+  const isDetailMode = Boolean(id) && !isEditMode;
   const { currentExercise, loading: createLoading } = useSelector((state: RootState) => state.exercises);
 
   useEffect(() => {
-    if (isEditMode && id) {
+    if ((isEditMode || isDetailMode) && id) {
       dispatch(fetchExercise(id));
     }
-  }, [dispatch, isEditMode, id]);
+  }, [dispatch, isEditMode, isDetailMode, id]);
 
   useEffect(() => {
-    if (isEditMode && currentExercise) {
+    if ((isEditMode || isDetailMode) && currentExercise) {
       form.setFieldsValue({
         name: currentExercise.name,
         nameZh: currentExercise.nameZh,
@@ -63,7 +67,7 @@ const CreateExercise: React.FC = () => {
       setInstructions(currentExercise.instructions || ['']);
       setInstructionsZh(currentExercise.instructionsZh || ['']);
     }
-  }, [isEditMode, currentExercise, form]);
+  }, [isEditMode, isDetailMode, currentExercise, form]);
 
   const handleAddInstruction = (type: 'instructions' | 'instructionsZh') => {
     if (type === 'instructions') {
@@ -107,57 +111,23 @@ const CreateExercise: React.FC = () => {
 
       if (isEditMode && id) {
         await dispatch(updateExercise({ id, data: exerciseData })).unwrap();
-        message.success('动作更新成功！');
+        message.success(t('exercises.updateSuccess'));
       } else {
         await dispatch(createExercise(exerciseData)).unwrap();
-        message.success('动作创建成功！');
+        message.success(t('exercises.createSuccess'));
       }
 
       navigate('/exercises');
     } catch (error: any) {
-      message.error(error.message || `${isEditMode ? '更新' : '创建'}失败，请重试`);
+      message.error(error.message || t('exercises.operationFailed'));
     }
   };
 
-  const muscleGroupOptions = [
-    { value: 'chest', label: '胸部' },
-    { value: 'back', label: '背部' },
-    { value: 'shoulders', label: '肩部' },
-    { value: 'biceps', label: '二头肌' },
-    { value: 'triceps', label: '三头肌' },
-    { value: 'legs', label: '腿部' },
-    { value: 'glutes', label: '臀部' },
-    { value: 'abs', label: '腹部' },
-    { value: 'forearms', label: '前臂' },
-    { value: 'calves', label: '小腿' }
-  ];
-
-  const equipmentOptions = [
-    { value: 'bodyweight', label: '自重' },
-    { value: 'dumbbell', label: '哑铃' },
-    { value: 'barbell', label: '杠铃' },
-    { value: 'kettlebell', label: '壶铃' },
-    { value: 'resistance_band', label: '阻力带' },
-    { value: 'cable', label: '绳索' },
-    { value: 'machine', label: '器械' },
-    { value: 'bench', label: '训练凳' },
-    { value: 'pull_up_bar', label: '引体向上杆' },
-    { value: 'other', label: '其他' }
-  ];
-
-  const difficultyOptions = [
-    { value: 'BEGINNER', label: '初级' },
-    { value: 'INTERMEDIATE', label: '中级' },
-    { value: 'ADVANCED', label: '高级' }
-  ];
-
-  const categoryOptions = [
-    { value: 'strength', label: '力量训练' },
-    { value: 'cardio', label: '有氧运动' },
-    { value: 'flexibility', label: '柔韧性' },
-    { value: 'balance', label: '平衡训练' },
-    { value: 'plyometric', label: '爆发力训练' }
-  ];
+  // 使用多语言预设选项
+  const muscleGroupOptions = getPresetOptions('muscleGroups');
+  const equipmentOptions = getPresetOptions('equipment');
+  const difficultyOptions = getPresetOptions('difficulty');
+  const categoryOptions = getPresetOptions('categories');
 
   return (
     <div>
@@ -168,14 +138,14 @@ const CreateExercise: React.FC = () => {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/exercises')}
           >
-            返回
+            {t('common.back')}
           </Button>
           <div>
             <Title level={2} className="page-title">
-              {isEditMode ? '编辑动作' : '创建动作'}
+              {isDetailMode ? t('exercises.detailTitle') : isEditMode ? t('exercises.editExercise') : t('exercises.createExercise')}
             </Title>
             <Text className="page-description">
-              {isEditMode ? '修改动作信息' : '添加新的动作到动作库'}
+              {isDetailMode ? t('exercises.detailDescription') : isEditMode ? t('exercises.editExerciseDescription') : t('exercises.createExerciseDescription')}
             </Text>
           </div>
         </div>
@@ -188,6 +158,7 @@ const CreateExercise: React.FC = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
+              disabled={isDetailMode}
               initialValues={{
                 isTemplate: false,
                 isPublic: true,
@@ -198,19 +169,19 @@ const CreateExercise: React.FC = () => {
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    label="动作名称（英文）"
+                    label={t('exercises.exerciseName')}
                     name="name"
-                    rules={[{ required: true, message: '请输入动作名称' }]}
+                    rules={[{ required: true, message: t('common.error') }]}
                   >
-                    <Input placeholder="例如：Push Up" />
+                    <Input placeholder={t('exercises.namePlaceholder')} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="动作名称（中文）"
+                    label={t('exercises.exerciseNameZh')}
                     name="nameZh"
                   >
-                    <Input placeholder="例如：俯卧撑" />
+                    <Input placeholder={t('exercises.nameZhPlaceholder')} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -218,18 +189,18 @@ const CreateExercise: React.FC = () => {
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    label="描述（英文）"
+                    label={t('exercises.descriptionEn')}
                     name="description"
                   >
-                    <TextArea placeholder="动作描述" rows={3} />
+                    <TextArea placeholder={t('exercises.descriptionPlaceholder')} rows={3} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="描述（中文）"
+                    label={t('exercises.descriptionZh')}
                     name="descriptionZh"
                   >
-                    <TextArea placeholder="动作描述" rows={3} />
+                    <TextArea placeholder={t('exercises.descriptionPlaceholder')} rows={3} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -237,24 +208,24 @@ const CreateExercise: React.FC = () => {
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    label="目标肌肉群"
+                    label={t('exercises.targetMuscleGroups')}
                     name="muscleGroups"
-                    rules={[{ required: true, message: '请选择目标肌肉群' }]}
+                    rules={[{ required: true, message: t('exercises.selectTargetMuscleGroups') }]}
                   >
                     <Select
                       mode="multiple"
-                      placeholder="选择目标肌肉群"
+                      placeholder={t('exercises.selectTargetMuscleGroupsPlaceholder')}
                       options={muscleGroupOptions}
                     />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="所需设备"
+                    label={t('exercises.requiredEquipment')}
                     name="equipment"
                   >
                     <Select
-                      placeholder="选择所需设备"
+                      placeholder={t('exercises.selectEquipmentPlaceholder')}
                       options={equipmentOptions}
                     />
                   </Form.Item>
@@ -264,7 +235,7 @@ const CreateExercise: React.FC = () => {
               <Row gutter={16}>
                 <Col span={8}>
                   <Form.Item
-                    label="难度等级"
+                    label={t('exercises.difficultyLevel')}
                     name="difficultyLevel"
                   >
                     <Select options={difficultyOptions} />
@@ -272,7 +243,7 @@ const CreateExercise: React.FC = () => {
                 </Col>
                 <Col span={8}>
                   <Form.Item
-                    label="动作分类"
+                    label={t('exercises.exerciseCategory')}
                     name="category"
                   >
                     <Select options={categoryOptions} />
@@ -280,28 +251,28 @@ const CreateExercise: React.FC = () => {
                 </Col>
                 <Col span={8}>
                   <Form.Item
-                    label="GIF动图URL"
+                    label={t('exercises.gifUrl')}
                     name="gifUrl"
                   >
-                    <Input placeholder="动图链接（可选）" />
+                    <Input placeholder={t('exercises.gifUrlPlaceholder')} />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Divider>动作说明</Divider>
+              <Divider>{t('exercises.instructions')}</Divider>
 
               <Row gutter={16}>
                 <Col span={12}>
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <Text strong>英文说明</Text>
+                      <Text strong>{t('exercises.instructionsEn')}</Text>
                       <Button
                         type="dashed"
                         size="small"
                         icon={<PlusOutlined />}
                         onClick={() => handleAddInstruction('instructions')}
                       >
-                        添加步骤
+                        {t('exercises.addStep')}
                       </Button>
                     </div>
                     {instructions.map((instruction, index) => (
@@ -310,7 +281,7 @@ const CreateExercise: React.FC = () => {
                         <Input
                           value={instruction}
                           onChange={(e) => handleInstructionChange(index, e.target.value, 'instructions')}
-                          placeholder={`步骤 ${index + 1}`}
+                          placeholder={`${t('exercises.stepPlaceholder').replace('{number}', String(index + 1))}`}
                           style={{ flex: 1 }}
                         />
                         {instructions.length > 1 && (
@@ -330,14 +301,14 @@ const CreateExercise: React.FC = () => {
                 <Col span={12}>
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <Text strong>中文说明</Text>
+                      <Text strong>{t('exercises.instructionsZh')}</Text>
                       <Button
                         type="dashed"
                         size="small"
                         icon={<PlusOutlined />}
                         onClick={() => handleAddInstruction('instructionsZh')}
                       >
-                        添加步骤
+                        {t('exercises.addStep')}
                       </Button>
                     </div>
                     {instructionsZh.map((instruction, index) => (
@@ -346,7 +317,7 @@ const CreateExercise: React.FC = () => {
                         <Input
                           value={instruction}
                           onChange={(e) => handleInstructionChange(index, e.target.value, 'instructionsZh')}
-                          placeholder={`步骤 ${index + 1}`}
+                          placeholder={`${t('exercises.stepPlaceholder').replace('{number}', String(index + 1))}`}
                           style={{ flex: 1 }}
                         />
                         {instructionsZh.length > 1 && (
@@ -365,12 +336,12 @@ const CreateExercise: React.FC = () => {
                 </Col>
               </Row>
 
-              <Divider>设置</Divider>
+              <Divider>{t('exercises.settings')}</Divider>
 
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    label="设为模板"
+                    label={t('exercises.setAsTemplate')}
                     name="isTemplate"
                     valuePropName="checked"
                   >
@@ -379,7 +350,7 @@ const CreateExercise: React.FC = () => {
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="公开动作"
+                    label={t('exercises.makePublic')}
                     name="isPublic"
                     valuePropName="checked"
                   >
@@ -388,39 +359,41 @@ const CreateExercise: React.FC = () => {
                 </Col>
               </Row>
 
-              <Form.Item>
-                <Space>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={createLoading}
-                    size="large"
-                  >
-                    {isEditMode ? '更新动作' : '创建动作'}
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/exercises')}
-                    size="large"
-                  >
-                    取消
-                  </Button>
-                </Space>
-              </Form.Item>
+              {!isDetailMode && (
+                <Form.Item>
+                  <Space>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={createLoading}
+                      size="large"
+                    >
+                      {isEditMode ? t('common.update') : t('common.create')}
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/exercises')}
+                      size="large"
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                  </Space>
+                </Form.Item>
+              )}
             </Form>
           </Card>
         </Col>
 
         <Col xs={24} lg={8}>
-          <Card title="创建提示">
+          <Card title={t('exercises.tipsTitle')}>
             <div style={{ color: '#666' }}>
-              <p><strong>动作信息：</strong></p>
-              <p>• 动作名称是必填项</p>
-              <p>• 建议同时填写中英文名称</p>
-              <p>• 目标肌肉群至少选择一个</p>
-              <p>• 详细描述有助于其他用户理解</p>
-              <p>• 动作说明按步骤填写</p>
-              <p>• 模板动作可供快速创建</p>
-              <p>• 公开动作其他用户可见</p>
+              <p><strong>{t('exercises.tipsExerciseInfo')}</strong></p>
+              <p>• {t('exercises.tip1')}</p>
+              <p>• {t('exercises.tip2')}</p>
+              <p>• {t('exercises.tip3')}</p>
+              <p>• {t('exercises.tip4')}</p>
+              <p>• {t('exercises.tip5')}</p>
+              <p>• {t('exercises.tip6')}</p>
+              <p>• {t('exercises.tip7')}</p>
             </div>
           </Card>
         </Col>

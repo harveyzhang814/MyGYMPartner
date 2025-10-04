@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { fetchExerciseSessions, deleteExerciseSession } from '../store/slices/exerciseSessionSlice';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,7 @@ const ExerciseSessions: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { exerciseSessions, loading } = useSelector((state: RootState) => state.exerciseSessions);
+  const { t } = useLanguage();
 
   useEffect(() => {
     dispatch(fetchExerciseSessions());
@@ -20,9 +22,9 @@ const ExerciseSessions: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await dispatch(deleteExerciseSession(id)).unwrap();
-      message.success('训练记录删除成功！');
+      message.success(t('exerciseSessions.deleteSuccess'));
     } catch (error) {
-      message.error('删除失败，请重试');
+      message.error(t('common.deleteFailed'));
     }
   };
 
@@ -42,13 +44,13 @@ const ExerciseSessions: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return '已完成';
+        return t('exerciseSessions.completed');
       case 'IN_PROGRESS':
-        return '进行中';
+        return t('exerciseSessions.inProgress');
       case 'PAUSED':
-        return '已暂停';
+        return t('exerciseSessions.paused');
       case 'CANCELLED':
-        return '已取消';
+        return t('exerciseSessions.cancelled');
       default:
         return status;
     }
@@ -59,8 +61,8 @@ const ExerciseSessions: React.FC = () => {
       <div className="page-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <Title level={2} className="page-title">训练记录</Title>
-            <Text className="page-description">查看和管理您的训练记录</Text>
+            <Title level={2} className="page-title">{t('exerciseSessions.title')}</Title>
+            <Text className="page-description">{t('exerciseSessions.description')}</Text>
           </div>
           <Button 
             type="primary" 
@@ -68,14 +70,14 @@ const ExerciseSessions: React.FC = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate('/exercise-sessions/create')}
           >
-            开始训练
+            {t('exerciseSessions.startTraining')}
           </Button>
         </div>
       </div>
 
       {loading ? (
         <div className="loading-container">
-          <Text type="secondary">加载中...</Text>
+          <Text type="secondary">{t('common.loading')}</Text>
         </div>
       ) : exerciseSessions.length > 0 ? (
         <Row gutter={[16, 16]}>
@@ -90,7 +92,7 @@ const ExerciseSessions: React.FC = () => {
                     icon={<EyeOutlined />} 
                     onClick={() => navigate(`/exercise-sessions/${session.id}`)}
                   >
-                    查看详情
+                    {t('exerciseSessions.viewDetails')}
                   </Button>,
                   session.status === 'IN_PROGRESS' && (
                     <Button 
@@ -98,17 +100,17 @@ const ExerciseSessions: React.FC = () => {
                       icon={<PlayCircleOutlined />}
                       onClick={() => navigate(`/exercise-sessions/${session.id}/edit`)}
                     >
-                      继续训练
+                      {t('exerciseSessions.continueTraining')}
                     </Button>
                   ),
                   <Popconfirm
-                    title="确定要删除这个训练记录吗？"
+                    title={t('exerciseSessions.deleteConfirm')}
                     onConfirm={() => handleDelete(session.id)}
-                    okText="确定"
-                    cancelText="取消"
+                    okText={t('common.confirm')}
+                    cancelText={t('common.cancel')}
                   >
                     <Button type="text" danger icon={<DeleteOutlined />}>
-                      删除
+                      {t('common.delete')}
                     </Button>
                   </Popconfirm>
                 ]}
@@ -129,13 +131,13 @@ const ExerciseSessions: React.FC = () => {
                       <div className="session-stat-value">
                         {session.exerciseRecords?.length || 0}
                       </div>
-                      <div className="session-stat-label">训练组</div>
+                      <div className="session-stat-label">{t('exerciseSessions.trainingGroupsLabel')}</div>
                     </div>
                     <div className="session-stat">
                       <div className="session-stat-value">
                         {session.totalDurationMinutes || 0}
                       </div>
-                      <div className="session-stat-label">分钟</div>
+                      <div className="session-stat-label">{t('exerciseSessions.minutes')}</div>
                     </div>
                     <div className="session-stat">
                       <div className="session-stat-value">
@@ -143,7 +145,7 @@ const ExerciseSessions: React.FC = () => {
                           {getStatusText(session.status)}
                         </Tag>
                       </div>
-                      <div className="session-stat-label">状态</div>
+                      <div className="session-stat-label">{t('exerciseSessions.status')}</div>
                     </div>
                   </div>
                   {session.notes && (
@@ -161,14 +163,14 @@ const ExerciseSessions: React.FC = () => {
           <div className="empty-icon">
             <TrophyOutlined />
           </div>
-          <div className="empty-title">暂无训练记录</div>
-          <div className="empty-description">开始您的第一次训练吧！</div>
+          <div className="empty-title">{t('exerciseSessions.noSessions')}</div>
+          <div className="empty-description">{t('exerciseSessions.startFirstSession')}</div>
           <Button 
             type="primary" 
             icon={<PlusOutlined />}
             onClick={() => navigate('/exercise-sessions/create')}
           >
-            开始训练
+            {t('exerciseSessions.startTraining')}
           </Button>
         </div>
       )}

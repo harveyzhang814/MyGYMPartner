@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { register, clearError } from '../store/slices/authSlice';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,7 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -71,7 +73,7 @@ const Register: React.FC = () => {
           <Title level={2} style={{ color: '#1890ff', marginBottom: 8 }}>
             MyGYMPartner
           </Title>
-          <Text type="secondary">开始您的健身之旅</Text>
+          <Text type="secondary">{t('common.startJourney')}</Text>
         </div>
 
         <Form
@@ -83,27 +85,27 @@ const Register: React.FC = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: '请输入邮箱地址！' },
-              { type: 'email', message: '请输入有效的邮箱地址！' }
+              { required: true, message: t('common.error') },
+              { type: 'email', message: t('common.error') }
             ]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="邮箱地址"
+              placeholder={t('common.email')}
             />
           </Form.Item>
 
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: '请输入用户名！' },
-              { min: 3, max: 20, message: '用户名长度为3-20个字符！' },
-              { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线！' }
+              { required: true, message: t('common.error') },
+              { min: 3, max: 20, message: t('common.error') },
+              { pattern: /^[a-zA-Z0-9_]+$/, message: t('common.error') }
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="用户名"
+              placeholder={t('common.username')}
             />
           </Form.Item>
 
@@ -112,7 +114,7 @@ const Register: React.FC = () => {
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="名字（可选）"
+              placeholder={t('common.firstName')}
             />
           </Form.Item>
 
@@ -121,36 +123,36 @@ const Register: React.FC = () => {
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="姓氏（可选）"
+              placeholder={t('common.lastName')}
             />
           </Form.Item>
 
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: '请输入密码！' },
-              { min: 8, message: '密码至少8位字符！' },
+              { required: true, message: t('common.error') },
+              { min: 8, message: t('common.error') },
               { 
                 pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
-                message: '密码必须包含大小写字母和数字！'
+                message: t('common.error')
               }
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="密码"
+              placeholder={t('common.password')}
             />
           </Form.Item>
 
           <Form.Item
             name="confirmPassword"
             rules={[
-              { required: true, message: '请确认密码！' }
+              { required: true, message: t('common.error') }
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="确认密码"
+              placeholder={t('common.confirmPassword')}
             />
           </Form.Item>
 
@@ -163,17 +165,17 @@ const Register: React.FC = () => {
               icon={<UserAddOutlined />}
               style={{ height: 48, borderRadius: 8 }}
             >
-              注册
+              {t('common.register')}
             </Button>
           </Form.Item>
         </Form>
 
         <div style={{ textAlign: 'center', marginTop: 24 }}>
           <Space>
-            <Text type="secondary">已有账号？</Text>
+            <Text type="secondary">{t('common.haveAccount')}</Text>
             <Link to="/login">
               <Button type="link" style={{ padding: 0 }}>
-                立即登录
+                {t('common.loginNow')}
               </Button>
             </Link>
           </Space>

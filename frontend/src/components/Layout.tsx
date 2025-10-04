@@ -14,6 +14,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { logout } from '../store/slices/authSlice';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Header, Sider, Content } = AntLayout;
 const { Text } = Typography;
@@ -24,27 +26,28 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { t } = useLanguage();
 
   const menuItems = [
     {
       key: '/dashboard',
       icon: <DashboardOutlined />,
-      label: '仪表板',
+      label: t('navigation.dashboard'),
     },
     {
       key: '/training-groups',
       icon: <TeamOutlined />,
-      label: '训练组',
+      label: t('navigation.trainingGroups'),
     },
     {
       key: '/exercise-sessions',
       icon: <HistoryOutlined />,
-      label: '训练记录',
+      label: t('navigation.exerciseSessions'),
     },
     {
       key: '/exercises',
       icon: <AppstoreOutlined />,
-      label: '动作库',
+      label: t('navigation.exercises'),
     },
   ];
 
@@ -122,7 +125,8 @@ const Layout: React.FC = () => {
           />
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text>欢迎回来，{user?.firstName || user?.username}！</Text>
+            <Text>{t('dashboard.welcome')}，{user?.firstName || user?.username}！</Text>
+            <LanguageSwitcher />
             <Dropdown
               menu={{ items: userMenuItems }}
               placement="bottomRight"

@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { login, clearError } from '../store/slices/authSlice';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -58,7 +60,7 @@ const Login: React.FC = () => {
           <Title level={2} style={{ color: '#1890ff', marginBottom: 8 }}>
             MyGYMPartner
           </Title>
-          <Text type="secondary">您的专属健身伙伴</Text>
+          <Text type="secondary">{t('common.appDescription')}</Text>
         </div>
 
         <Form
@@ -70,26 +72,26 @@ const Login: React.FC = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: '请输入邮箱地址！' },
-              { type: 'email', message: '请输入有效的邮箱地址！' }
+              { required: true, message: t('common.error') },
+              { type: 'email', message: t('common.error') }
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="邮箱地址"
+              placeholder={t('common.email')}
             />
           </Form.Item>
 
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: '请输入密码！' },
-              { min: 8, message: '密码至少8位字符！' }
+              { required: true, message: t('common.error') },
+              { min: 8, message: t('common.error') }
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="密码"
+              placeholder={t('common.password')}
             />
           </Form.Item>
 
@@ -102,17 +104,17 @@ const Login: React.FC = () => {
               icon={<LoginOutlined />}
               style={{ height: 48, borderRadius: 8 }}
             >
-              登录
+              {t('common.login')}
             </Button>
           </Form.Item>
         </Form>
 
         <div style={{ textAlign: 'center', marginTop: 24 }}>
           <Space>
-            <Text type="secondary">还没有账号？</Text>
+            <Text type="secondary">{t('common.noAccount')}</Text>
             <Link to="/register">
               <Button type="link" style={{ padding: 0 }}>
-                立即注册
+                {t('common.registerNow')}
               </Button>
             </Link>
           </Space>

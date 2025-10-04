@@ -377,8 +377,8 @@ export const deleteExercise = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Check if user has permission to delete (creator or admin)
-    if (existingExercise.createdBy !== userId) {
+    // Check if user has permission to delete (creator, admin, or system exercise)
+    if (existingExercise.createdBy && existingExercise.createdBy !== userId) {
       res.status(403).json({
         success: false,
         error: 'Permission denied'

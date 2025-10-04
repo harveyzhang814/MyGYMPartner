@@ -7,6 +7,7 @@ import type { RootState, AppDispatch } from '../store';
 import { createExerciseSession, fetchExerciseSession } from '../store/slices/exerciseSessionSlice';
 import { fetchTrainingGroups } from '../store/slices/trainingGroupSlice';
 import { fetchExercises } from '../store/slices/exerciseSlice';
+import { useLanguage } from '../contexts/LanguageContext';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -37,6 +38,7 @@ const CreateExerciseSession: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const [form] = Form.useForm();
+  const { t } = useLanguage();
   const [selectedTrainingGroups, setSelectedTrainingGroups] = useState<string[]>([]);
   const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([
     {
@@ -92,7 +94,7 @@ const CreateExerciseSession: React.FC = () => {
   // 从训练组导入数据
   const handleImportFromTrainingGroups = () => {
     if (selectedTrainingGroups.length === 0) {
-      message.warning('请先选择要导入的训练组');
+      message.warning(t('exerciseSessions.selectTrainingGroupsFirst'));
       return;
     }
 
@@ -128,7 +130,7 @@ const CreateExerciseSession: React.FC = () => {
     // 添加到现有记录中，而不是替换
     setExerciseRecords([...exerciseRecords, ...importedRecords]);
     setSelectedTrainingGroups([]); // 清空选择
-    message.success(`成功添加 ${importedRecords.length} 个训练组`);
+    message.success(t('exerciseSessions.successfullyAddedTrainingGroups').replace('{count}', String(importedRecords.length)));
   };
 
   const handleAddExercise = () => {
@@ -181,7 +183,7 @@ const CreateExerciseSession: React.FC = () => {
       // 验证所有动作都已选择
       const hasEmptyExercise = exerciseRecords.some(record => !record.exerciseId);
       if (hasEmptyExercise) {
-        message.error('请为所有动作选择具体的动作');
+        message.error(t('exerciseSessions.selectAllExercises'));
         return;
       }
 
@@ -190,7 +192,7 @@ const CreateExerciseSession: React.FC = () => {
         record.sets.some(set => set.reps === 0 || set.weight === 0)
       );
       if (hasEmptySets) {
-        message.error('请填写完整的训练组数据');
+        message.error(t('exerciseSessions.fillCompleteTrainingData'));
         return;
       }
 
@@ -201,10 +203,10 @@ const CreateExerciseSession: React.FC = () => {
       };
 
       await dispatch(createExerciseSession(sessionData)).unwrap();
-      message.success('训练记录创建成功！');
+      message.success(t('exerciseSessions.createSuccess'));
       navigate('/exercise-sessions');
     } catch (error: any) {
-      message.error(error.message || '创建失败，请重试');
+      message.error(error.message || t('exerciseSessions.createFailed'));
     }
   };
 
@@ -216,14 +218,14 @@ const CreateExerciseSession: React.FC = () => {
             icon={<ArrowLeftOutlined />} 
             onClick={() => navigate('/exercise-sessions')}
           >
-            返回
+            {t('common.back')}
           </Button>
           <div>
             <Title level={2} className="page-title">
-              {isDetailMode ? '训练记录详情' : isEditMode ? '进行训练' : '记录训练'}
+              {isDetailMode ? t('exerciseSessions.detailTitle') : isEditMode ? t('exerciseSessions.continueTraining') : t('exerciseSessions.recordTraining')}
             </Title>
             <Text className="page-description">
-              {isDetailMode ? '查看训练记录详情' : isEditMode ? '继续您的训练' : '记录您的训练过程'}
+              {isDetailMode ? t('exerciseSessions.detailDescription') : isEditMode ? t('exerciseSessions.continueDescription') : t('exerciseSessions.recordDescription')}
             </Text>
           </div>
         </div>
@@ -247,18 +249,18 @@ const CreateExerciseSession: React.FC = () => {
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
-                    label="训练日期"
+                    label={t('exerciseSessions.trainingDate')}
                     name="date"
-                    rules={[{ required: true, message: '请选择训练日期' }]}
+                    rules={[{ required: true, message: t('exerciseSessions.selectTrainingDate') }]}
                   >
                     <DatePicker style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="开始时间"
+                    label={t('exerciseSessions.startTime')}
                     name="startTime"
-                    rules={[{ required: true, message: '请选择开始时间' }]}
+                    rules={[{ required: true, message: t('exerciseSessions.selectStartTime') }]}
                   >
                     <TimePicker style={{ width: '100%' }} format="HH:mm" />
                   </Form.Item>
@@ -268,24 +270,24 @@ const CreateExerciseSession: React.FC = () => {
               <Row gutter={16}>
                 <Col span={24}>
                   <Form.Item
-                    label="训练描述"
+                    label={t('exerciseSessions.trainingDescription')}
                     name="description"
                   >
-                    <Input placeholder="训练描述（可选）" />
+                    <Input placeholder={t('exerciseSessions.trainingDescriptionPlaceholder')} />
                   </Form.Item>
                 </Col>
               </Row>
 
               <div style={{ marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <Text strong>训练动作</Text>
+                  <Text strong>{t('exerciseSessions.trainingExercises')}</Text>
                   {!isDetailMode && (
                     <Button 
                       type="dashed" 
                       icon={<PlusOutlined />} 
                       onClick={handleAddExercise}
                     >
-                      手动添加动作
+                      {t('exerciseSessions.addExerciseManually')}
                     </Button>
                   )}
                 </div>
@@ -293,11 +295,11 @@ const CreateExerciseSession: React.FC = () => {
                 {!isDetailMode && (
                   <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
                     <div style={{ marginBottom: 12 }}>
-                      <Text strong>从训练组导入：</Text>
+                      <Text strong>{t('exerciseSessions.importFromTrainingGroups')}</Text>
                     </div>
                     <Select
                       mode="multiple"
-                      placeholder="选择要导入的训练组"
+                      placeholder={t('exerciseSessions.selectTrainingGroupsToImport')}
                       value={selectedTrainingGroups}
                       onChange={setSelectedTrainingGroups}
                       style={{ width: '100%', marginBottom: 12 }}
@@ -315,7 +317,7 @@ const CreateExerciseSession: React.FC = () => {
                       onClick={handleImportFromTrainingGroups}
                       disabled={selectedTrainingGroups.length === 0}
                     >
-                      添加训练组
+                      {t('exerciseSessions.addTrainingGroups')}
                     </Button>
                   </Card>
                 )}
@@ -327,7 +329,7 @@ const CreateExerciseSession: React.FC = () => {
                     key={exerciseIndex} 
                     size="small" 
                     style={{ marginBottom: 16 }}
-                    title={`动作 ${exerciseIndex + 1}`}
+                    title={`${t('exerciseSessions.exerciseNumber').replace('{number}', String(exerciseIndex + 1))}`}
                     extra={
                       !isDetailMode && exerciseRecords.length > 1 && (
                         <Button 
@@ -341,9 +343,9 @@ const CreateExerciseSession: React.FC = () => {
                   >
                     <Row gutter={16} style={{ marginBottom: 16 }}>
                       <Col span={24}>
-                        <Text>选择动作</Text>
+                        <Text>{t('exerciseSessions.selectExercise')}</Text>
                         <Select
-                          placeholder="选择动作"
+                          placeholder={t('exerciseSessions.selectExercisePlaceholder')}
                           value={record.exerciseId}
                           onChange={(value) => handleExerciseChange(exerciseIndex, 'exerciseId', value)}
                           style={{ width: '100%' }}
@@ -364,14 +366,14 @@ const CreateExerciseSession: React.FC = () => {
                     {record.trainingGroupId && (
                       <div style={{ marginBottom: 16, padding: 8, backgroundColor: '#e6f7ff', borderRadius: 4 }}>
                         <Text type="secondary">
-                          <ImportOutlined /> 来自训练组: {trainingGroups.find(g => g.id === record.trainingGroupId)?.name}
+                          <ImportOutlined /> {t('exerciseSessions.fromTrainingGroup')}: {trainingGroups.find(g => g.id === record.trainingGroupId)?.name}
                         </Text>
                       </div>
                     )}
 
                     <div style={{ marginBottom: 12 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <Text strong>训练组</Text>
+                        <Text strong>{t('exerciseSessions.trainingSets')}</Text>
                         {!isDetailMode && (
                           <Button 
                             type="dashed" 
@@ -379,7 +381,7 @@ const CreateExerciseSession: React.FC = () => {
                             icon={<PlusOutlined />} 
                             onClick={() => handleAddSet(exerciseIndex)}
                           >
-                            添加组
+                            {t('exerciseSessions.addSet')}
                           </Button>
                         )}
                       </div>
@@ -389,7 +391,7 @@ const CreateExerciseSession: React.FC = () => {
                           key={setIndex} 
                           size="small" 
                           style={{ marginBottom: 8 }}
-                          title={`第 ${setIndex + 1} 组`}
+                          title={`${t('exerciseSessions.setNumber').replace('{number}', String(setIndex + 1))}`}
                           extra={
                             !isDetailMode && record.sets.length > 1 && (
                               <Button 
@@ -404,7 +406,7 @@ const CreateExerciseSession: React.FC = () => {
                         >
                           <Row gutter={8}>
                             <Col span={6}>
-                              <Text>次数</Text>
+                              <Text>{t('exerciseSessions.reps')}</Text>
                               <InputNumber
                                 min={1}
                                 max={100}
@@ -414,7 +416,7 @@ const CreateExerciseSession: React.FC = () => {
                               />
                             </Col>
                             <Col span={6}>
-                              <Text>重量 (kg)</Text>
+                              <Text>{t('exerciseSessions.weight')} (kg)</Text>
                               <InputNumber
                                 min={0}
                                 max={1000}
@@ -425,7 +427,7 @@ const CreateExerciseSession: React.FC = () => {
                               />
                             </Col>
                             <Col span={6}>
-                              <Text>休息 (秒)</Text>
+                              <Text>{t('exerciseSessions.rest')} (秒)</Text>
                               <InputNumber
                                 min={0}
                                 max={600}
@@ -435,9 +437,9 @@ const CreateExerciseSession: React.FC = () => {
                               />
                             </Col>
                             <Col span={6}>
-                              <Text>备注</Text>
+                              <Text>{t('exerciseSessions.notes')}</Text>
                               <Input
-                                placeholder="备注"
+                                placeholder={t('exerciseSessions.notesPlaceholder')}
                                 value={set.notes}
                                 onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
                                 style={{ width: '100%' }}
@@ -452,11 +454,11 @@ const CreateExerciseSession: React.FC = () => {
               </div>
 
               <Form.Item
-                label="训练备注"
+                label={t('exerciseSessions.trainingNotes')}
                 name="notes"
               >
                 <TextArea 
-                  placeholder="记录训练感受、注意事项等" 
+                  placeholder={t('exerciseSessions.trainingNotesPlaceholder')} 
                   rows={3}
                 />
               </Form.Item>
@@ -471,13 +473,13 @@ const CreateExerciseSession: React.FC = () => {
                       size="large"
                       icon={<PlayCircleOutlined />}
                     >
-                      保存记录
+                      {t('exerciseSessions.saveRecord')}
                     </Button>
                     <Button 
                       onClick={() => navigate('/exercise-sessions')}
                       size="large"
                     >
-                      取消
+                      {t('common.cancel')}
                     </Button>
                   </Space>
                 </Form.Item>
@@ -487,15 +489,15 @@ const CreateExerciseSession: React.FC = () => {
         </Col>
 
         <Col xs={24} lg={8}>
-          <Card title="训练提示">
+          <Card title={t('exerciseSessions.tipsTitle')}>
             <div style={{ color: '#666' }}>
-              <p><strong>灵活添加训练内容：</strong></p>
-              <p>• 可以同时使用导入和手动创建</p>
-              <p>• 从训练组导入：快速添加已有训练组</p>
-              <p>• 手动添加：自由创建新的训练内容</p>
-              <p>• 可以多次导入不同的训练组</p>
-              <p>• 可以混合使用两种方式</p>
-              <p>• 记录每组的具体数据和感受</p>
+              <p><strong>{t('exerciseSessions.tipsTitle')}</strong></p>
+              <p>• {t('exerciseSessions.tip1')}</p>
+              <p>• {t('exerciseSessions.tip2')}</p>
+              <p>• {t('exerciseSessions.tip3')}</p>
+              <p>• {t('exerciseSessions.tip4')}</p>
+              <p>• {t('exerciseSessions.tip5')}</p>
+              <p>• {t('exerciseSessions.tip6')}</p>
             </div>
           </Card>
         </Col>

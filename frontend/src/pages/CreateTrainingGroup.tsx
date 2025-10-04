@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { createTrainingGroup, updateTrainingGroup, fetchTrainingGroup } from '../store/slices/trainingGroupSlice';
 import { fetchExercises } from '../store/slices/exerciseSlice';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -31,23 +32,25 @@ const CreateTrainingGroup: React.FC = () => {
   const [sets, setSets] = useState<TrainingSet[]>([
     { reps: 10, weight: 0, restTime: 60 }
   ]);
+  const { t } = useLanguage();
 
-  const isEditMode = Boolean(id);
+  const isEditMode = Boolean(id) && window.location.pathname.includes('/edit');
+  const isDetailMode = Boolean(id) && !isEditMode;
   const { exercises, loading: exercisesLoading } = useSelector((state: RootState) => state.exercises);
   const { currentTrainingGroup, loading: createLoading } = useSelector((state: RootState) => state.trainingGroups);
 
   useEffect(() => {
     dispatch(fetchExercises({ page: 1, limit: 100 }));
     
-    // 如果是编辑模式，加载训练组数据
-    if (isEditMode && id) {
+    // 如果是编辑模式或详情模式，加载训练组数据
+    if ((isEditMode || isDetailMode) && id) {
       dispatch(fetchTrainingGroup(id));
     }
-  }, [dispatch, isEditMode, id]);
+  }, [dispatch, isEditMode, isDetailMode, id]);
 
   // 当训练组数据加载完成后，填充表单
   useEffect(() => {
-    if (isEditMode && currentTrainingGroup) {
+    if ((isEditMode || isDetailMode) && currentTrainingGroup) {
       form.setFieldsValue({
         name: currentTrainingGroup.name,
         description: currentTrainingGroup.description,
@@ -72,7 +75,7 @@ const CreateTrainingGroup: React.FC = () => {
       }
       setSets(generatedSets);
     }
-  }, [isEditMode, currentTrainingGroup, form]);
+  }, [isEditMode, isDetailMode, currentTrainingGroup, form]);
 
   const handleAddSet = () => {
     setSets([...sets, { reps: 10, weight: 0, restTime: 60 }]);
@@ -107,21 +110,21 @@ const CreateTrainingGroup: React.FC = () => {
         weightMin: Math.min(...weightValues),
         weightMax: Math.max(...weightValues),
         restTimeSeconds: Math.round(restTimeValues.reduce((a, b) => a + b, 0) / restTimeValues.length),
-        notes: `包含${sets.length}个训练组`,
+        notes: t('trainingGroups.containsSets').replace('{count}', String(sets.length)),
         tags: []
       };
 
       if (isEditMode && id) {
         await dispatch(updateTrainingGroup({ id, data: trainingGroupData })).unwrap();
-        message.success('训练组更新成功！');
+        message.success(t('trainingGroups.updateSuccess'));
       } else {
         await dispatch(createTrainingGroup(trainingGroupData)).unwrap();
-        message.success('训练组创建成功！');
+        message.success(t('trainingGroups.createSuccess'));
       }
       
       navigate('/training-groups');
     } catch (error: any) {
-      message.error(error.message || `${isEditMode ? '更新' : '创建'}失败，请重试`);
+      message.error(error.message || t('trainingGroups.operationFailed'));
     }
   };
 
@@ -133,14 +136,14 @@ const CreateTrainingGroup: React.FC = () => {
             icon={<ArrowLeftOutlined />} 
             onClick={() => navigate('/training-groups')}
           >
-            返回
+            {t('common.back')}
           </Button>
           <div>
             <Title level={2} className="page-title">
-              {isEditMode ? '编辑训练组' : '创建训练组'}
+              {isDetailMode ? t('trainingGroups.detailTitle') : isEditMode ? t('trainingGroups.editTitle') : t('trainingGroups.createTitle')}
             </Title>
             <Text className="page-description">
-              {isEditMode ? '修改您的训练组参数' : '设置您的训练组参数'}
+              {isDetailMode ? t('trainingGroups.detailDescription') : isEditMode ? t('trainingGroups.editDescription') : t('trainingGroups.createDescription')}
             </Text>
           </div>
         </div>
@@ -153,6 +156,7 @@ const CreateTrainingGroup: React.FC = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
+              disabled={isDetailMode}
               initialValues={{
                 name: '',
                 description: '',
@@ -160,30 +164,30 @@ const CreateTrainingGroup: React.FC = () => {
               }}
             >
               <Form.Item
-                label="训练组名称"
+                label={t('trainingGroups.nameLabel')}
                 name="name"
-                rules={[{ required: true, message: '请输入训练组名称' }]}
+                rules={[{ required: true, message: t('common.required') }]}
               >
-                <Input placeholder="例如：胸部训练" />
+                <Input placeholder={t('trainingGroups.namePlaceholder')} />
               </Form.Item>
 
               <Form.Item
-                label="描述"
+                label={t('trainingGroups.descriptionLabel')}
                 name="description"
               >
                 <Input.TextArea 
-                  placeholder="训练组描述（可选）" 
+                  placeholder={t('trainingGroups.descriptionPlaceholder')} 
                   rows={3}
                 />
               </Form.Item>
 
               <Form.Item
-                label="选择动作"
+                label={t('trainingGroups.selectExercise')}
                 name="exerciseId"
-                rules={[{ required: true, message: '请选择动作' }]}
+                rules={[{ required: true, message: t('common.required') }]}
               >
                 <Select
-                  placeholder="选择动作"
+                  placeholder={t('trainingGroups.selectExercisePlaceholder')}
                   loading={exercisesLoading}
                   showSearch
                   filterOption={(input, option) =>
@@ -200,14 +204,16 @@ const CreateTrainingGroup: React.FC = () => {
 
               <div style={{ marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <Text strong>训练组设置</Text>
-                  <Button 
-                    type="dashed" 
-                    icon={<PlusOutlined />} 
-                    onClick={handleAddSet}
-                  >
-                    添加组
-                  </Button>
+                  <Text strong>{t('trainingGroups.trainingSets')}</Text>
+                  {!isDetailMode && (
+                    <Button 
+                      type="dashed" 
+                      icon={<PlusOutlined />} 
+                      onClick={handleAddSet}
+                    >
+                      {t('trainingGroups.addSet')}
+                    </Button>
+                  )}
                 </div>
 
                 {sets.map((set, index) => (
@@ -215,31 +221,34 @@ const CreateTrainingGroup: React.FC = () => {
                     key={index} 
                     size="small" 
                     style={{ marginBottom: 12 }}
-                    title={`第 ${index + 1} 组`}
+                    title={`${t('trainingGroups.set')} ${index + 1}`}
                     extra={
-                      sets.length > 1 && (
+                      !isDetailMode && sets.length > 1 && (
                         <Button 
                           type="text" 
                           danger 
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemoveSet(index)}
-                        />
+                        >
+                          {t('common.delete')}
+                        </Button>
                       )
                     }
                   >
                     <Row gutter={16}>
                       <Col span={8}>
-                        <Text>次数</Text>
+                        <Text>{t('trainingGroups.reps')}</Text>
                         <InputNumber
                           min={1}
                           max={100}
                           value={set.reps}
                           onChange={(value) => handleSetChange(index, 'reps', value || 0)}
                           style={{ width: '100%' }}
+                          disabled={isDetailMode}
                         />
                       </Col>
                       <Col span={8}>
-                        <Text>重量 (kg)</Text>
+                        <Text>{t('trainingGroups.weight')} (kg)</Text>
                         <InputNumber
                           min={0}
                           max={1000}
@@ -247,16 +256,18 @@ const CreateTrainingGroup: React.FC = () => {
                           value={set.weight}
                           onChange={(value) => handleSetChange(index, 'weight', value || 0)}
                           style={{ width: '100%' }}
+                          disabled={isDetailMode}
                         />
                       </Col>
                       <Col span={8}>
-                        <Text>休息时间 (秒)</Text>
+                        <Text>{t('trainingGroups.restTime')} (秒)</Text>
                         <InputNumber
                           min={0}
                           max={600}
                           value={set.restTime}
                           onChange={(value) => handleSetChange(index, 'restTime', value || 60)}
                           style={{ width: '100%' }}
+                          disabled={isDetailMode}
                         />
                       </Col>
                     </Row>
@@ -264,36 +275,38 @@ const CreateTrainingGroup: React.FC = () => {
                 ))}
               </div>
 
-              <Form.Item>
-                <Space>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
-                    loading={createLoading}
-                    size="large"
-                  >
-                    {isEditMode ? '更新训练组' : '创建训练组'}
-                  </Button>
-                  <Button 
-                    onClick={() => navigate('/training-groups')}
-                    size="large"
-                  >
-                    取消
-                  </Button>
-                </Space>
-              </Form.Item>
+              {!isDetailMode && (
+                <Form.Item>
+                  <Space>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit" 
+                      loading={createLoading}
+                      size="large"
+                    >
+                      {isEditMode ? t('common.update') : t('common.create')}
+                    </Button>
+                    <Button 
+                      onClick={() => navigate('/training-groups')}
+                      size="large"
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                  </Space>
+                </Form.Item>
+              )}
             </Form>
           </Card>
         </Col>
 
         <Col xs={24} lg={8}>
-          <Card title="提示">
+          <Card title={t('trainingGroups.tipsTitle')}>
             <div style={{ color: '#666' }}>
-              <p>• 训练组名称应该简洁明了</p>
-              <p>• 选择合适的动作进行训练</p>
-              <p>• 设置合理的次数和重量</p>
-              <p>• 休息时间建议60-180秒</p>
-              <p>• 可以添加多个训练组</p>
+              <p>• {t('trainingGroups.tip1')}</p>
+              <p>• {t('trainingGroups.tip2')}</p>
+              <p>• {t('trainingGroups.tip3')}</p>
+              <p>• {t('trainingGroups.tip4')}</p>
+              <p>• {t('trainingGroups.tip5')}</p>
             </div>
           </Card>
         </Col>

@@ -15,15 +15,17 @@ import CreateExerciseSession from './pages/CreateExerciseSession';
 import CreateExercise from './pages/CreateExercise';
 import Exercises from './pages/Exercises';
 import ProtectedRoute from './components/ProtectedRoute';
+import { LanguageProvider } from './contexts/LanguageContext';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <Provider store={store}>
-      <ConfigProvider locale={zhCN}>
-        <Router>
-          <div className="App">
-            <Routes>
+      <LanguageProvider>
+        <ConfigProvider locale={zhCN}>
+          <Router>
+            <div className="App">
+              <Routes>
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -38,6 +40,7 @@ const App: React.FC = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="training-groups" element={<TrainingGroups />} />
                 <Route path="training-groups/create" element={<CreateTrainingGroup />} />
+                <Route path="training-groups/:id" element={<CreateTrainingGroup />} />
                 <Route path="training-groups/:id/edit" element={<CreateTrainingGroup />} />
                 <Route path="exercise-sessions" element={<ExerciseSessions />} />
                 <Route path="exercise-sessions/create" element={<CreateExerciseSession />} />
@@ -45,15 +48,17 @@ const App: React.FC = () => {
                 <Route path="exercise-sessions/:id/edit" element={<CreateExerciseSession />} />
                 <Route path="exercises" element={<Exercises />} />
                 <Route path="exercises/create" element={<CreateExercise />} />
+                <Route path="exercises/:id" element={<CreateExercise />} />
                 <Route path="exercises/:id/edit" element={<CreateExercise />} />
               </Route>
               
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </div>
-        </Router>
-      </ConfigProvider>
+              </Routes>
+            </div>
+          </Router>
+        </ConfigProvider>
+      </LanguageProvider>
     </Provider>
   );
 };

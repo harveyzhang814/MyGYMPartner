@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { fetchExercises, addToFavorites, removeFromFavorites, deleteExercise } from '../store/slices/exerciseSlice';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getPresetOptions } from '../locales';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -14,6 +16,7 @@ const Exercises: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { exercises, favoriteExercises, loading } = useSelector((state: RootState) => state.exercises);
+  const { t } = useLanguage();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string | undefined>();
@@ -37,13 +40,13 @@ const Exercises: React.FC = () => {
     try {
       if (isFavorite) {
         await dispatch(removeFromFavorites(exerciseId)).unwrap();
-        message.success('已从收藏中移除');
+        message.success(t('exercises.removedFromFavorites'));
       } else {
         await dispatch(addToFavorites(exerciseId)).unwrap();
-        message.success('已添加到收藏');
+        message.success(t('exercises.addedToFavorites'));
       }
     } catch (error) {
-      message.error('操作失败，请重试');
+      message.error(t('exercises.operationFailed'));
     }
   };
 
@@ -54,23 +57,24 @@ const Exercises: React.FC = () => {
   const handleDeleteExercise = async (exerciseId: string) => {
     try {
       await dispatch(deleteExercise(exerciseId)).unwrap();
-      message.success('动作删除成功');
+      message.success(t('exercises.deleteSuccess'));
     } catch (error: any) {
-      message.error(error.message || '删除失败，请重试');
+      message.error(error.message || t('exercises.deleteFailed'));
     }
   };
 
-  const muscleGroups = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core'];
-  const equipmentTypes = ['barbell', 'dumbbell', 'bodyweight', 'machine', 'cable'];
-  const difficultyLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
+  // 使用多语言预设选项
+  const muscleGroupOptions = getPresetOptions('muscleGroups');
+  const equipmentOptions = getPresetOptions('equipment');
+  const difficultyOptions = getPresetOptions('difficulty');
 
   return (
     <div>
       <div className="page-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <Title level={2} className="page-title">动作库</Title>
-            <Text className="page-description">浏览、创建和管理健身动作</Text>
+            <Title level={2} className="page-title">{t('exercises.title')}</Title>
+            <Text className="page-description">{t('exercises.description')}</Text>
           </div>
           <Button
             type="primary"
@@ -78,7 +82,7 @@ const Exercises: React.FC = () => {
             onClick={() => navigate('/exercises/create')}
             size="large"
           >
-            创建动作
+            {t('exercises.createExercise')}
           </Button>
         </div>
       </div>
@@ -87,7 +91,7 @@ const Exercises: React.FC = () => {
       <Card style={{ marginBottom: 24 }}>
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Search
-            placeholder="搜索动作名称..."
+            placeholder={t('exercises.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onSearch={handleSearch}
@@ -97,59 +101,33 @@ const Exercises: React.FC = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
               <Select
-                placeholder="选择肌肉群"
+                placeholder={t('exercises.selectMuscleGroup')}
                 value={selectedMuscleGroup}
                 onChange={setSelectedMuscleGroup}
                 style={{ width: '100%' }}
                 allowClear
-              >
-                {muscleGroups.map(group => (
-                  <Option key={group} value={group}>
-                    {group === 'chest' ? '胸部' :
-                     group === 'back' ? '背部' :
-                     group === 'legs' ? '腿部' :
-                     group === 'shoulders' ? '肩部' :
-                     group === 'arms' ? '手臂' :
-                     group === 'core' ? '核心' : group}
-                  </Option>
-                ))}
-              </Select>
+                options={muscleGroupOptions}
+              />
             </Col>
             <Col xs={24} sm={8}>
               <Select
-                placeholder="选择设备"
+                placeholder={t('exercises.selectEquipment')}
                 value={selectedEquipment}
                 onChange={setSelectedEquipment}
                 style={{ width: '100%' }}
                 allowClear
-              >
-                {equipmentTypes.map(equipment => (
-                  <Option key={equipment} value={equipment}>
-                    {equipment === 'barbell' ? '杠铃' :
-                     equipment === 'dumbbell' ? '哑铃' :
-                     equipment === 'bodyweight' ? '自重' :
-                     equipment === 'machine' ? '器械' :
-                     equipment === 'cable' ? '绳索' : equipment}
-                  </Option>
-                ))}
-              </Select>
+                options={equipmentOptions}
+              />
             </Col>
             <Col xs={24} sm={8}>
               <Select
-                placeholder="选择难度"
+                placeholder={t('exercises.selectDifficulty')}
                 value={selectedDifficulty}
                 onChange={setSelectedDifficulty}
                 style={{ width: '100%' }}
                 allowClear
-              >
-                {difficultyLevels.map(level => (
-                  <Option key={level} value={level}>
-                    {level === 'BEGINNER' ? '初级' :
-                     level === 'INTERMEDIATE' ? '中级' :
-                     level === 'ADVANCED' ? '高级' : level}
-                  </Option>
-                ))}
-              </Select>
+                options={difficultyOptions}
+              />
             </Col>
           </Row>
           <Button 
@@ -158,7 +136,7 @@ const Exercises: React.FC = () => {
             onClick={handleSearch}
             size="large"
           >
-            搜索
+            {t('common.search')}
           </Button>
         </Space>
       </Card>
@@ -205,28 +183,28 @@ const Exercises: React.FC = () => {
                     onClick={() => handleFavoriteToggle(exercise.id, isFavorite(exercise.id))}
                     style={{ color: isFavorite(exercise.id) ? '#faad14' : undefined }}
                   >
-                    {isFavorite(exercise.id) ? '已收藏' : '收藏'}
+                    {isFavorite(exercise.id) ? t('exercises.favorited') : t('exercises.favorite')}
                   </Button>,
                   <Button
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
                   >
-                    编辑
+                    {t('common.edit')}
                   </Button>,
                   <Popconfirm
-                    title="确定要删除这个动作吗？"
-                    description="删除后无法恢复，请确认。"
+                    title={t('exercises.deleteConfirm')}
+                    description={t('exercises.deleteDescription')}
                     onConfirm={() => handleDeleteExercise(exercise.id)}
-                    okText="确定"
-                    cancelText="取消"
+                    okText={t('common.confirm')}
+                    cancelText={t('common.cancel')}
                   >
                     <Button
                       type="text"
                       danger
                       icon={<DeleteOutlined />}
                     >
-                      删除
+                      {t('common.delete')}
                     </Button>
                   </Popconfirm>
                 ]}
