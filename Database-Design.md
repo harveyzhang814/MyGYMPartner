@@ -73,11 +73,10 @@ CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
 
 ### 2.2 动作库相关表
 
-#### exercises - 动作库表（缓存exercisedb-api数据）
+#### exercises - 动作库表（用户自维护）
 ```sql
 CREATE TABLE exercises (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    external_id VARCHAR(50) UNIQUE, -- exercisedb-api的ID
     name VARCHAR(255) NOT NULL,
     name_zh VARCHAR(255), -- 中文名称
     description TEXT,
@@ -91,8 +90,11 @@ CREATE TABLE exercises (
     images JSONB, -- 图片URL数组
     videos JSONB, -- 视频URL数组
     gif_url TEXT, -- GIF动图URL
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL, -- 创建者
+    is_template BOOLEAN DEFAULT false, -- 是否为模板动作
+    is_public BOOLEAN DEFAULT true, -- 是否公开（其他用户可见）
+    usage_count INTEGER DEFAULT 0, -- 使用次数统计
     is_active BOOLEAN DEFAULT true,
-    last_synced_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -103,8 +105,11 @@ CREATE INDEX idx_exercises_muscle_groups ON exercises USING GIN(muscle_groups);
 CREATE INDEX idx_exercises_equipment ON exercises(equipment);
 CREATE INDEX idx_exercises_difficulty ON exercises(difficulty_level);
 CREATE INDEX idx_exercises_category ON exercises(category);
+CREATE INDEX idx_exercises_created_by ON exercises(created_by);
+CREATE INDEX idx_exercises_is_template ON exercises(is_template);
+CREATE INDEX idx_exercises_is_public ON exercises(is_public);
+CREATE INDEX idx_exercises_usage_count ON exercises(usage_count);
 CREATE INDEX idx_exercises_is_active ON exercises(is_active);
-CREATE INDEX idx_exercises_external_id ON exercises(external_id);
 ```
 
 #### user_favorite_exercises - 用户收藏动作表
