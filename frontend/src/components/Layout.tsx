@@ -4,6 +4,7 @@ import { Layout as AntLayout, Menu, Avatar, Dropdown, Button, Typography } from 
 import {
   DashboardOutlined,
   TeamOutlined,
+  CalendarOutlined,
   HistoryOutlined,
   AppstoreOutlined,
   UserOutlined,
@@ -38,6 +39,11 @@ const Layout: React.FC = () => {
       key: '/training-groups',
       icon: <TeamOutlined />,
       label: t('navigation.trainingGroups'),
+    },
+    {
+      key: '/training-plans',
+      icon: <CalendarOutlined />,
+      label: t('navigation.trainingPlans'),
     },
     {
       key: '/exercise-sessions',

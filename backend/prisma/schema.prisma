@@ -36,6 +36,7 @@ model User {
   exerciseSessions ExerciseSession[]
   userFavoriteExercises UserFavoriteExercise[]
   createdExercises Exercise[]
+  trainingPlans TrainingPlan[]
 
   @@map("users")
 }
@@ -109,6 +110,7 @@ model TrainingGroup {
   exercise        Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
   trainingGroupSets TrainingGroupSet[]
   exerciseRecords ExerciseRecord[]
+  trainingPlanGroups TrainingPlanGroup[]
 
   @@map("training_groups")
 }
@@ -146,6 +148,7 @@ model ExerciseSession {
 
   // Relations
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlan    TrainingPlan?   @relation(fields: [trainingPlanId], references: [id], onDelete: SetNull)
   exerciseRecords ExerciseRecord[]
 
   @@map("exercise_sessions")
@@ -189,6 +192,43 @@ model ExerciseSetRecord {
   @@map("exercise_set_records")
 }
 
+model TrainingPlan {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  name            String
+  description     String?
+  status          PlanStatus @default(DRAFT)
+  startDate       DateTime? @map("start_date") @db.Date
+  endDate         DateTime? @map("end_date") @db.Date
+  isTemplate      Boolean  @default(false) @map("is_template")
+  isPublic        Boolean  @default(false) @map("is_public")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlanGroups  TrainingPlanGroup[]
+  exerciseSessions    ExerciseSession[]
+
+  @@map("training_plans")
+}
+
+model TrainingPlanGroup {
+  id              String   @id @default(uuid())
+  trainingPlanId  String   @map("training_plan_id")
+  trainingGroupId String   @map("training_group_id")
+  orderIndex      Int      @map("order_index")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  trainingPlan  TrainingPlan  @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  trainingGroup TrainingGroup @relation(fields: [trainingGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingPlanId, orderIndex])
+  @@map("training_plan_groups")
+}
+
 // Enums
 enum Gender {
   MALE
@@ -210,6 +250,14 @@ enum DifficultyLevel {
 
 enum SessionStatus {
   IN_PROGRESS
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
   COMPLETED
   PAUSED
   CANCELLED

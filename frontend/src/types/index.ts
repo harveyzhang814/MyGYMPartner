@@ -103,6 +103,57 @@ export interface ExerciseSearchParams extends PaginationParams {
   createdBy?: string;
 }
 
+// Training Plan types
+export interface TrainingPlan {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
+  startDate?: string;
+  endDate?: string;
+  isTemplate: boolean;
+  isPublic: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  trainingPlanGroups: TrainingPlanGroup[];
+  _count: {
+    trainingPlanGroups: number;
+  };
+}
+
+export interface TrainingPlanGroup {
+  id: string;
+  trainingPlanId: string;
+  trainingGroupId: string;
+  orderIndex: number;
+  trainingGroup: TrainingGroup;
+}
+
+export interface CreateTrainingPlanRequest {
+  name: string;
+  description?: string;
+  status?: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
+  startDate?: string;
+  endDate?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+  trainingGroupIds?: string[];
+}
+
+export interface UpdateTrainingPlanRequest extends Partial<CreateTrainingPlanRequest> {
+  id: string;
+}
+
+export interface TrainingPlanSearchParams extends PaginationParams {
+  search?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  isTemplate?: boolean;
+  isPublic?: boolean;
+}
+
 // Training Group types
 export interface TrainingGroup {
   id: string;

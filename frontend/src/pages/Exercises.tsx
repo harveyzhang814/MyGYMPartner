@@ -10,7 +10,6 @@ import { getPresetOptions } from '../locales';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
-const { Option } = Select;
 
 const Exercises: React.FC = () => {
   const navigate = useNavigate();

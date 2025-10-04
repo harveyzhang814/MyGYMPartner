@@ -3,6 +3,7 @@ import authSlice from './slices/authSlice';
 import trainingGroupSlice from './slices/trainingGroupSlice';
 import exerciseSlice from './slices/exerciseSlice';
 import exerciseSessionSlice from './slices/exerciseSessionSlice';
+import trainingPlanSlice from './slices/trainingPlanSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     trainingGroups: trainingGroupSlice,
     exercises: exerciseSlice,
     exerciseSessions: exerciseSessionSlice,
+    trainingPlans: trainingPlanSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

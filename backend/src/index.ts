@@ -10,6 +10,7 @@ import authRoutes from './routes/auth';
 import trainingGroupRoutes from './routes/trainingGroups';
 import exerciseSessionRoutes from './routes/exerciseSessions';
 import exerciseRoutes from './routes/exercises';
+import trainingPlanRoutes from './routes/trainingPlans';
 
 // Import controllers for initialization
 import { initializeBasicExercises } from './controllers/exerciseController';
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/training-groups', trainingGroupRoutes);
 app.use('/api/exercise-sessions', exerciseSessionRoutes);
 app.use('/api/exercises', exerciseRoutes);
+app.use('/api/training-plans', trainingPlanRoutes);
 
 // Error handling middleware
 app.use(notFound);

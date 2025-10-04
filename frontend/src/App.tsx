@@ -14,6 +14,8 @@ import ExerciseSessions from './pages/ExerciseSessions';
 import CreateExerciseSession from './pages/CreateExerciseSession';
 import CreateExercise from './pages/CreateExercise';
 import Exercises from './pages/Exercises';
+import TrainingPlans from './pages/TrainingPlans';
+import CreateTrainingPlan from './pages/CreateTrainingPlan';
 import ProtectedRoute from './components/ProtectedRoute';
 import { LanguageProvider } from './contexts/LanguageContext';
 import './App.css';
@@ -50,6 +52,10 @@ const App: React.FC = () => {
                 <Route path="exercises/create" element={<CreateExercise />} />
                 <Route path="exercises/:id" element={<CreateExercise />} />
                 <Route path="exercises/:id/edit" element={<CreateExercise />} />
+                <Route path="training-plans" element={<TrainingPlans />} />
+                <Route path="training-plans/create" element={<CreateTrainingPlan />} />
+                <Route path="training-plans/:id" element={<CreateTrainingPlan />} />
+                <Route path="training-plans/:id/edit" element={<CreateTrainingPlan />} />
               </Route>
               
               {/* Catch all route */}
