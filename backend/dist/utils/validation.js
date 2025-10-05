@@ -19,22 +19,25 @@ exports.validateUsername = validateUsername;
 const validateRequest = (req, res, next) => {
     const { email, username, password } = req.body;
     if (email && !(0, exports.validateEmail)(email)) {
-        return res.status(400).json({
+        res.status(400).json({
             success: false,
             error: 'Invalid email format'
         });
+        return;
     }
     if (username && !(0, exports.validateUsername)(username)) {
-        return res.status(400).json({
+        res.status(400).json({
             success: false,
             error: 'Username must be 3-20 characters, alphanumeric and underscore only'
         });
+        return;
     }
     if (password && !(0, exports.validatePassword)(password)) {
-        return res.status(400).json({
+        res.status(400).json({
             success: false,
             error: 'Password must be at least 8 characters with uppercase, lowercase, and number'
         });
+        return;
     }
     next();
 };

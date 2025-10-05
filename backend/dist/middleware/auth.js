@@ -10,10 +10,11 @@ const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
-            return res.status(401).json({
+            res.status(401).json({
                 success: false,
                 error: 'Access denied. No token provided.'
             });
+            return;
         }
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         const user = await index_1.prisma.user.findUnique({
@@ -40,10 +41,11 @@ const authenticate = async (req, res, next) => {
             }
         });
         if (!user || !user.isActive) {
-            return res.status(401).json({
+            res.status(401).json({
                 success: false,
                 error: 'Invalid token or user not found.'
             });
+            return;
         }
         req.user = user;
         next();

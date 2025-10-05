@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Tag, Empty, Row, Col, InputNumber, Divider } from 'antd';
+import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Empty, Row, Col, InputNumber, Divider } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,7 +8,7 @@ import { fetchTrainingPlan, createTrainingPlan, updateTrainingPlan } from '../st
 import { fetchTrainingGroups } from '../store/slices/trainingGroupSlice';
 import { fetchExercises } from '../store/slices/exerciseSlice';
 import { useLanguage } from '../contexts/LanguageContext';
-import { TrainingGroup, CreateTrainingPlanRequest, Exercise } from '../types';
+import { CreateTrainingPlanRequest } from '../types';
 import dayjs from 'dayjs';
 import './CreateTrainingPlan.css';
 
@@ -255,10 +255,10 @@ const CreateTrainingPlan: React.FC = () => {
     return t('trainingPlans.createDescription');
   };
 
-  const getSubmitButtonText = () => {
-    if (isEditMode) return '更新计划';
-    return '创建计划';
-  };
+  // const getSubmitButtonText = () => {
+  //   if (isEditMode) return '更新计划';
+  //   return '创建计划';
+  // };
 
   return (
     <div>
@@ -424,7 +424,7 @@ const CreateTrainingPlan: React.FC = () => {
                           loading={exercisesLoading}
                           showSearch
                           filterOption={(input, option) =>
-                            (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+                            String(option?.children || '').toLowerCase().includes(input.toLowerCase())
                           }
                         >
                           {exercises.map((exercise) => (

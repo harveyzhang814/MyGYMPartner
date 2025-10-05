@@ -3,7 +3,10 @@ import type { ApiResponse } from '../types';
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 
+    (import.meta.env.PROD 
+      ? 'https://mygympartner-backend.railway.app/api'
+      : 'http://localhost:3001/api'),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

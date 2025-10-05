@@ -1,5 +1,5 @@
 import api from './api';
-import { TrainingPlan, PaginatedResponse, PaginationParams, CreateTrainingPlanRequest, UpdateTrainingPlanRequest, TrainingPlanSearchParams } from '../types';
+import { TrainingPlan, PaginatedResponse, CreateTrainingPlanRequest, TrainingPlanSearchParams } from '../types';
 
 export const trainingPlanService = {
   // Get training plans

@@ -10,10 +10,11 @@ const createTrainingGroup = async (req, res) => {
             where: { id: trainingGroupData.exerciseId }
         });
         if (!exercise) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Exercise not found'
             });
+            return;
         }
         const trainingGroup = await index_1.prisma.trainingGroup.create({
             data: {
@@ -127,7 +128,7 @@ const getTrainingGroup = async (req, res) => {
             }
         });
         if (!trainingGroup) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Training group not found'
             });
@@ -158,7 +159,7 @@ const updateTrainingGroup = async (req, res) => {
             }
         });
         if (!existingTrainingGroup) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Training group not found'
             });
@@ -205,7 +206,7 @@ const deleteTrainingGroup = async (req, res) => {
             }
         });
         if (!existingTrainingGroup) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Training group not found'
             });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Select, InputNumber, Space, message, Row, Col, DatePicker, TimePicker, Radio, Divider } from 'antd';
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, PlayCircleOutlined, ImportOutlined, EditOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, Typography, Select, InputNumber, Space, message, Row, Col, DatePicker, TimePicker, Divider } from 'antd';
+import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, PlayCircleOutlined, ImportOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -26,6 +26,7 @@ interface ExerciseRecord {
 }
 
 interface ExerciseSessionForm {
+  name?: string;
   description?: string;
   date: dayjs.Dayjs;
   startTime: dayjs.Dayjs;
@@ -47,11 +48,11 @@ const CreateExerciseSession: React.FC = () => {
     }
   ]);
 
-  const isCreateMode = location.pathname.includes('/create');
+  // const isCreateMode = location.pathname.includes('/create');
   const isEditMode = location.pathname.includes('/edit');
   const isDetailMode = Boolean(id) && !isEditMode;
   const { trainingGroups, loading: trainingGroupsLoading } = useSelector((state: RootState) => state.trainingGroups);
-  const { exercises, loading: exercisesLoading } = useSelector((state: RootState) => state.exercises);
+  const { exercises } = useSelector((state: RootState) => state.exercises);
   const { currentExerciseSession, loading: createLoading } = useSelector((state: RootState) => state.exerciseSessions);
 
   useEffect(() => {
@@ -197,6 +198,7 @@ const CreateExerciseSession: React.FC = () => {
       }
 
       const sessionData = {
+        name: values.name || `训练会话 ${values.date.format('YYYY-MM-DD')}`,
         sessionDate: values.date.format('YYYY-MM-DD'),
         startTime: values.startTime.toDate(),
         notes: values.notes || values.description
@@ -351,7 +353,7 @@ const CreateExerciseSession: React.FC = () => {
                           style={{ width: '100%' }}
                           showSearch
                           filterOption={(input, option) =>
-                            (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+                            String(option?.children || '').toLowerCase().includes(input.toLowerCase())
                           }
                         >
                           {exercises.map((exercise) => (

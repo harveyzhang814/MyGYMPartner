@@ -8,9 +8,11 @@ const createExerciseSession = async (req, res) => {
         const sessionData = req.body;
         const session = await index_1.prisma.exerciseSession.create({
             data: {
-                ...sessionData,
-                userId,
-                sessionDate: new Date(sessionData.sessionDate)
+                name: `训练记录 ${new Date().toLocaleDateString()}`,
+                sessionDate: new Date(sessionData.sessionDate),
+                startTime: sessionData.startTime,
+                notes: sessionData.notes,
+                userId
             },
             include: {
                 exerciseRecords: {
@@ -155,7 +157,7 @@ const getExerciseSession = async (req, res) => {
             }
         });
         if (!session) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Exercise session not found'
             });
@@ -186,7 +188,7 @@ const addExerciseRecord = async (req, res) => {
             }
         });
         if (!session) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Exercise session not found'
             });
@@ -269,7 +271,7 @@ const updateExerciseSession = async (req, res) => {
             }
         });
         if (!existingSession) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Exercise session not found'
             });
@@ -323,7 +325,7 @@ const deleteExerciseSession = async (req, res) => {
             }
         });
         if (!existingSession) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: 'Exercise session not found'
             });

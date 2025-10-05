@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest, UpdateExerciseRequest } from '../../types';
+import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest } from '../../types';
 import { exerciseService } from '../../services/exerciseService';
 
 interface ExerciseState {
@@ -264,7 +264,7 @@ const exerciseSlice = createSlice({
         state.error = action.payload as string;
       })
       // Fetch exercise templates
-      .addCase(fetchExerciseTemplates.fulfilled, (state, action: PayloadAction<Exercise[]>) => {
+      .addCase(fetchExerciseTemplates.fulfilled, (_state, _action: PayloadAction<Exercise[]>) => {
         // Templates are handled separately, could be stored in a separate state if needed
       });
   },

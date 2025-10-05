@@ -19,7 +19,7 @@ const register = async (req, res) => {
             }
         });
         if (existingUser) {
-            return res.status(400).json({
+            res.status(400).json({
                 success: false,
                 error: existingUser.email === email ? 'Email already exists' : 'Username already exists'
             });
@@ -68,7 +68,7 @@ const register = async (req, res) => {
     }
     catch (error) {
         console.error('Registration error:', error);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -82,17 +82,19 @@ const login = async (req, res) => {
             where: { email }
         });
         if (!user || !user.isActive) {
-            return res.status(401).json({
+            res.status(401).json({
                 success: false,
                 error: 'Invalid credentials'
             });
+            return;
         }
         const isPasswordValid = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!isPasswordValid) {
-            return res.status(401).json({
+            res.status(401).json({
                 success: false,
                 error: 'Invalid credentials'
             });
+            return;
         }
         await index_1.prisma.user.update({
             where: { id: user.id },
@@ -112,7 +114,7 @@ const login = async (req, res) => {
     }
     catch (error) {
         console.error('Login error:', error);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -130,7 +132,7 @@ const getProfile = async (req, res) => {
     }
     catch (error) {
         console.error('Get profile error:', error);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             error: 'Internal server error'
         });

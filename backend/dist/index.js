@@ -14,6 +14,7 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const trainingGroups_1 = __importDefault(require("./routes/trainingGroups"));
 const exerciseSessions_1 = __importDefault(require("./routes/exerciseSessions"));
 const exercises_1 = __importDefault(require("./routes/exercises"));
+const trainingPlans_1 = __importDefault(require("./routes/trainingPlans"));
 const exerciseController_1 = require("./controllers/exerciseController");
 const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
@@ -23,7 +24,9 @@ const PORT = process.env.PORT || 3001;
 exports.prisma = new client_1.PrismaClient();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.CORS_ORIGIN?.split(',') || ['https://mygympartner.vercel.app']
+        : process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true
 }));
 app.use((0, morgan_1.default)('combined'));
@@ -40,6 +43,7 @@ app.use('/api/auth', auth_1.default);
 app.use('/api/training-groups', trainingGroups_1.default);
 app.use('/api/exercise-sessions', exerciseSessions_1.default);
 app.use('/api/exercises', exercises_1.default);
+app.use('/api/training-plans', trainingPlans_1.default);
 app.use(notFound_1.notFound);
 app.use(errorHandler_1.errorHandler);
 const server = app.listen(PORT, async () => {

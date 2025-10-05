@@ -4,7 +4,7 @@
   "description": "MyGYMPartner Backend API",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "test": "jest",
@@ -12,7 +12,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:deploy": "prisma migrate deploy",
+    "postinstall": "prisma generate"
   },
   "keywords": ["fitness", "gym", "workout", "api"],
   "author": "MyGYMPartner Team",

@@ -1,5 +1,5 @@
 import api from './api';
-import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest, UpdateExerciseRequest } from '../types';
+import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest } from '../types';
 
 export const exerciseService = {
   // Get exercises

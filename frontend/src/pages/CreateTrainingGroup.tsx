@@ -191,7 +191,7 @@ const CreateTrainingGroup: React.FC = () => {
                   loading={exercisesLoading}
                   showSearch
                   filterOption={(input, option) =>
-                    (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+                    String(option?.children || '').toLowerCase().includes(input.toLowerCase())
                   }
                 >
                   {exercises.map((exercise) => (
