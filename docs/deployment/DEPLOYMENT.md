@@ -128,19 +128,27 @@ npx prisma db push
 
 ## 常见问题
 
-### 1. CORS 错误
+### 1. Prisma Schema 找不到错误
+**问题**: 部署时出现 "Could not find Prisma Schema that is required for this command"
+**解决**: 
+- 确保 `prisma/schema.prisma` 文件存在于 backend 目录中
+- 检查 `PRISMA_SCHEMA_PATH` 环境变量是否正确设置
+- 确保构建脚本 `railway-build.sh` 有执行权限
+- 如果问题持续，可以尝试手动运行 `npx prisma generate`
+
+### 2. CORS 错误
 **问题**: 前端无法访问后端 API
 **解决**: 检查后端 `CORS_ORIGIN` 环境变量是否包含前端域名
 
-### 2. 数据库连接失败
+### 3. 数据库连接失败
 **问题**: 后端无法连接数据库
 **解决**: 检查 `DATABASE_URL` 环境变量是否正确
 
-### 3. 构建失败
+### 4. 构建失败
 **问题**: 前端或后端构建失败
 **解决**: 检查 `package.json` 中的依赖和构建脚本
 
-### 4. 环境变量未生效
+### 5. 环境变量未生效
 **问题**: 环境变量在运行时未生效
 **解决**: 确保环境变量名称正确，并重新部署服务
 

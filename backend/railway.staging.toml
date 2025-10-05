@@ -1,5 +1,6 @@
 [build]
 builder = "nixpacks"
+buildCommand = "chmod +x railway-build.sh && ./railway-build.sh"
 
 [deploy]
 startCommand = "npm run start"
@@ -10,3 +11,4 @@ restartPolicyMaxRetries = 10
 
 [env]
 NODE_ENV = "staging"
+PRISMA_SCHEMA_PATH = "prisma/schema.prisma"

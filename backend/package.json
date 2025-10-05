@@ -14,7 +14,9 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:deploy": "prisma migrate deploy",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prebuild": "prisma generate",
+    "prestart": "prisma generate"
   },
   "keywords": ["fitness", "gym", "workout", "api"],
   "author": "MyGYMPartner Team",
