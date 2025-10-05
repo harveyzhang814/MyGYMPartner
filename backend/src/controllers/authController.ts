@@ -23,6 +23,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         success: false,
         error: existingUser.email === email ? 'Email already exists' : 'Username already exists'
       });
+      return;
     }
 
     // Hash password

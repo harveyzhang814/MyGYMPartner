@@ -23,6 +23,7 @@ const register = async (req, res) => {
                 success: false,
                 error: existingUser.email === email ? 'Email already exists' : 'Username already exists'
             });
+            return;
         }
         const saltRounds = 12;
         const passwordHash = await bcryptjs_1.default.hash(password, saltRounds);
