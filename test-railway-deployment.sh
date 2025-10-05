@@ -105,7 +105,7 @@ echo ""
 
 # 4. CORS 测试
 echo -e "${YELLOW}🌐 CORS 测试${NC}"
-test_cors "Vercel 前端 CORS" "$BASE_URL/health" "https://mygympartner.vercel.app" "测试 Vercel 前端的 CORS 配置"
+test_cors "Vercel 前端 CORS" "$BASE_URL/health" "https://harveygympartner814.vercel.app" "测试 Vercel 前端的 CORS 配置"
 test_cors "本地开发 CORS" "$BASE_URL/health" "http://localhost:5173" "测试本地开发的 CORS 配置"
 echo ""
 

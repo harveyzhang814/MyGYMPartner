@@ -106,7 +106,7 @@
 NODE_ENV=production
 DATABASE_URL=postgresql://username:password@host:port/database
 JWT_SECRET=your-super-secret-jwt-key
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+CORS_ORIGIN=https://harveygympartner814.vercel.app
 ```
 
 ### 前端环境变量 (Vercel)

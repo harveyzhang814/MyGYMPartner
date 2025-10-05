@@ -30,7 +30,7 @@
 NODE_ENV=production
 DATABASE_URL=postgresql://username:password@host:port/database
 JWT_SECRET=your-super-secret-jwt-key-here
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+CORS_ORIGIN=https://harveygympartner814.vercel.app
 ```
 
 **重要说明**：
@@ -90,7 +90,7 @@ Vercel 会自动检测 Vite 项目，构建设置如下：
 
 #### 2.4 部署前端
 1. 点击 "Deploy" 开始部署
-2. 等待部署完成，记录前端地址 (如: `https://mygympartner.vercel.app`)
+2. 等待部署完成，记录前端地址 (如: `https://harveygympartner814.vercel.app`)
 
 ### 第三步：更新 CORS 配置
 
@@ -220,6 +220,6 @@ npx prisma db push
 ---
 
 **部署完成后，你的应用将可以通过以下地址访问：**
-- 前端: `https://your-frontend-domain.vercel.app`
+- 前端: `https://harveygympartner814.vercel.app`
 - 后端 API: `https://mygympartner-production.up.railway.app/api`
 - 健康检查: `https://mygympartner-production.up.railway.app/health`
