@@ -9,6 +9,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "@api_url_staging"
+    "VITE_API_URL": "https://mygympartner-production.up.railway.app/api"
   }
 }

@@ -52,14 +52,34 @@ CORS_ORIGIN=https://your-frontend-domain.vercel.app
 4. 选择 `frontend` 文件夹作为根目录
 
 #### 2.2 配置环境变量
-在 Vercel 项目设置中添加以下环境变量：
+有两种方式配置 Vercel 环境变量：
 
-```bash
-VITE_API_URL=https://your-backend-domain.railway.app/api
-```
+**方式一：直接在 Vercel 仪表板中设置**
+1. 在 Vercel 项目设置中，进入 **Settings** → **Environment Variables**
+2. 添加环境变量：
+   - **Name**: `VITE_API_URL`
+   - **Value**: `https://mygympartner-production.up.railway.app/api`
+   - **Environment**: 选择 Production, Preview, Development
+3. 点击 **Save**
+
+**方式二：使用 Secret（推荐）**
+1. 在 Vercel 项目设置中，进入 **Settings** → **Environment Variables**
+2. 点击 **Create Secret**
+3. 创建 Secret：
+   - **Name**: `api_url`
+   - **Value**: `https://mygympartner-production.up.railway.app/api`
+   - **Environment**: 选择 Production, Preview, Development
+4. 点击 **Save**
+5. 确保 `vercel.json` 文件中的配置正确：
+   ```json
+   "env": {
+     "VITE_API_URL": "@api_url"
+   }
+   ```
 
 **重要说明**：
-- 将 `your-backend-domain.railway.app` 替换为第一步中获得的 Railway 后端地址
+- 后端地址：`https://mygympartner-production.up.railway.app`
+- 如果遇到 "Secret does not exist" 错误，请确保已创建对应的 Secret
 
 #### 2.3 配置构建设置
 Vercel 会自动检测 Vite 项目，构建设置如下：
@@ -144,6 +164,13 @@ npx prisma db push
 **问题**: 环境变量在运行时未生效
 **解决**: 确保环境变量名称正确，并重新部署服务
 
+### 5. Vercel Secret 不存在错误
+**问题**: `Environment Variable "VITE_API_URL" references Secret "api_url", which does not exist`
+**解决**: 
+- 方法一：在 Vercel 仪表板中创建名为 `api_url` 的 Secret
+- 方法二：修改 `vercel.json` 文件，直接设置环境变量值而不是引用 Secret
+- 方法三：在 Vercel 项目设置中直接添加 `VITE_API_URL` 环境变量
+
 ## 安全注意事项
 
 ### 1. 环境变量安全
@@ -194,5 +221,5 @@ npx prisma db push
 
 **部署完成后，你的应用将可以通过以下地址访问：**
 - 前端: `https://your-frontend-domain.vercel.app`
-- 后端 API: `https://your-backend-domain.railway.app/api`
-- 健康检查: `https://your-backend-domain.railway.app/health`
+- 后端 API: `https://mygympartner-production.up.railway.app/api`
+- 健康检查: `https://mygympartner-production.up.railway.app/health`

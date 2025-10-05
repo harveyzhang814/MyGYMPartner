@@ -111,7 +111,7 @@ CORS_ORIGIN=https://your-frontend-domain.vercel.app
 
 ### 前端环境变量 (Vercel)
 ```bash
-VITE_API_URL=https://your-backend-domain.railway.app/api
+VITE_API_URL=https://mygympartner-production.up.railway.app/api
 ```
 
 ## ✅ 验证清单
