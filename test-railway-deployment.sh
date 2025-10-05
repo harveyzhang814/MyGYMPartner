@@ -172,6 +172,7 @@ if [ $FAILED_TESTS -eq 0 ]; then
     echo "✅ SSL/TLS 配置正确"
     echo ""
     echo -e "${GREEN}🚀 你的应用已经准备就绪！${NC}"
+    echo "前端可以连接到: https://mygympartner-production.up.railway.app/api"
 else
     echo ""
     echo -e "${RED}⚠️  有 $FAILED_TESTS 个测试失败，请检查部署配置${NC}"

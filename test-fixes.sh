@@ -97,7 +97,7 @@ echo -e "${YELLOW}🔐 认证端点测试${NC}"
 test_post_endpoint "用户注册" "$BASE_URL/api/auth/register" '{"email":"test2@example.com","username":"testuser2","password":"Password123"}' "201" "用户注册功能"
 test_post_endpoint "用户登录" "$BASE_URL/api/auth/login" '{"email":"test2@example.com","password":"Password123"}' "200" "用户登录功能"
 test_post_endpoint "重复注册" "$BASE_URL/api/auth/register" '{"email":"test2@example.com","username":"testuser2","password":"Password123"}' "400" "重复注册验证"
-test_post_endpoint "无效登录" "$BASE_URL/api/auth/login" '{"email":"test2@example.com","password":"WrongPassword123"}' "401" "无效密码验证"
+test_post_endpoint "无效登录" "$BASE_URL/api/auth/login" '{"email":"test2@example.com","password":"wrongpassword"}' "401" "无效密码验证"
 echo ""
 
 # 3. API 端点测试
