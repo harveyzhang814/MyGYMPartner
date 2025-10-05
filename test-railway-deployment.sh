@@ -50,6 +50,39 @@ test_endpoint() {
     fi
 }
 
+# POST 测试函数
+test_post_endpoint() {
+    local test_name="$1"
+    local url="$2"
+    local data="$3"
+    local expected_status="$4"
+    local description="$5"
+    
+    echo -n "🔍 测试 $test_name: "
+    
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    
+    # 执行 POST 请求
+    response=$(curl -s -w "\n%{http_code}" -X POST "$url" \
+        -H "Content-Type: application/json" \
+        -d "$data" 2>/dev/null)
+    http_code=$(echo "$response" | tail -n1)
+    body=$(echo "$response" | sed '$d')
+    
+    if [ "$http_code" = "$expected_status" ]; then
+        echo -e "${GREEN}✅ 通过${NC} (HTTP $http_code)"
+        echo "   📝 $description"
+        PASSED_TESTS=$((PASSED_TESTS + 1))
+        return 0
+    else
+        echo -e "${RED}❌ 失败${NC} (期望 HTTP $expected_status, 实际 HTTP $http_code)"
+        echo "   📝 $description"
+        echo "   📄 响应内容: $body"
+        FAILED_TESTS=$((FAILED_TESTS + 1))
+        return 1
+    fi
+}
+
 # 测试 CORS 函数
 test_cors() {
     local test_name="$1"
@@ -99,8 +132,8 @@ echo ""
 
 # 3. 认证端点测试
 echo -e "${YELLOW}🔐 认证端点测试${NC}"
-test_endpoint "用户注册" "$BASE_URL/api/auth/register" "400" "用户注册端点（缺少必要参数）"
-test_endpoint "用户登录" "$BASE_URL/api/auth/login" "400" "用户登录端点（缺少必要参数）"
+test_post_endpoint "用户注册" "$BASE_URL/api/auth/register" '{"email":"","username":"","password":""}' "400" "用户注册端点（缺少必要参数）"
+test_post_endpoint "用户登录" "$BASE_URL/api/auth/login" '{"email":"","password":""}' "400" "用户登录端点（缺少必要参数）"
 echo ""
 
 # 4. CORS 测试
