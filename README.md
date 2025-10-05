@@ -37,14 +37,14 @@ MyGYMPartner是一款专为健身爱好者设计的Web端训练计划管理应�
 - **构建工具**: Vite
 
 ### 部署
-- **容器化**: Docker + Docker Compose
+- **云平台**: Railway (后端) + Vercel (前端)
 - **数据库**: PostgreSQL 15
 
 ## 快速开始
 
 ### 环境要求
 - Node.js 18+
-- Docker & Docker Compose
+- PostgreSQL 15+
 - Git
 
 ### 安装步骤
@@ -55,16 +55,28 @@ git clone <repository-url>
 cd MyGYMPartner
 ```
 
-2. **启动开发环境**
+2. **配置环境变量**
 ```bash
-# 使用Docker Compose启动所有服务
-./start.sh
+# 复制环境变量模板
+cp env.template .env
 
-# 或者手动启动
-docker-compose up -d
+# 编辑环境变量文件，配置数据库连接等
 ```
 
-3. **访问应用**
+3. **启动开发服务器**
+```bash
+# 启动后端
+cd backend
+npm install
+npm run dev
+
+# 启动前端 (新终端)
+cd frontend
+npm install
+npm run dev
+```
+
+4. **访问应用**
 - 前端应用: http://localhost:5173
 - 后端API: http://localhost:3001
 - API文档: http://localhost:3001/health
@@ -136,7 +148,6 @@ MyGYMPartner/
 │   ├── development/       # 开发文档
 │   ├── deployment/        # 部署文档
 │   └── requirements/      # 需求文档
-├── docker-compose.yml      # Docker配置
 └── README.md
 ```
 

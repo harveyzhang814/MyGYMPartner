@@ -92,8 +92,8 @@ MyGYMPartner是一款专为健身爱好者设计的Web端训练计划管理应�
 - **缓存**：Redis
 
 ### 3.3 部署方案
-- **容器化**：Docker + Docker Compose
-- **云服务**：AWS / 阿里云 / 腾讯云
+- **云平台**：Railway (后端) + Vercel (前端)
+- **数据库**：PostgreSQL (Railway)
 - **CI/CD**：GitHub Actions
 - **监控**：Prometheus + Grafana
 - **日志**：Winston + ELK Stack

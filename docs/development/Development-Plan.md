@@ -446,8 +446,8 @@ npx prisma studio
 ## 9. 部署计划
 
 ### 9.1 开发环境
-- 本地开发：Docker Compose
-- 数据库：PostgreSQL容器
+- 本地开发：Node.js + npm
+- 数据库：PostgreSQL (本地或云数据库)
 - 前端：Vite开发服务器
 
 ### 9.2 测试环境
