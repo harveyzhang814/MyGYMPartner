@@ -31,9 +31,45 @@ export const prisma = new PrismaClient();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CORS_ORIGIN?.split(',') || ['https://harveygympartner814.vercel.app']
-    : process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // 允许没有 origin 的请求（如移动应用、Postman 等）
+    if (!origin) return callback(null, true);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // 生产环境：允许配置的域名和 Vercel 预览域名
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+        'https://harveygympartner814.vercel.app'
+      ];
+      
+      // 检查是否是允许的域名或 Vercel 预览域名
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (allowedOrigin.includes('*')) {
+          // 简单的通配符匹配
+          const pattern = allowedOrigin.replace('*', '.*');
+          return new RegExp(`^${pattern}$`).test(origin);
+        }
+        return allowedOrigin === origin;
+      }) || origin.includes('harveygympartner814') && origin.includes('vercel.app');
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // 开发环境：允许 localhost
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+        'http://localhost:5173',
+        'http://localhost:3000'
+      ];
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true
 }));
 app.use(morgan('combined'));

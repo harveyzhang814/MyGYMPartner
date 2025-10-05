@@ -24,9 +24,40 @@ const PORT = process.env.PORT || 3001;
 exports.prisma = new client_1.PrismaClient();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.CORS_ORIGIN?.split(',') || ['https://harveygympartner814.vercel.app']
-        : process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        if (!origin)
+            return callback(null, true);
+        if (process.env.NODE_ENV === 'production') {
+            const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+                'https://harveygympartner814.vercel.app'
+            ];
+            const isAllowed = allowedOrigins.some(allowedOrigin => {
+                if (allowedOrigin.includes('*')) {
+                    const pattern = allowedOrigin.replace('*', '.*');
+                    return new RegExp(`^${pattern}$`).test(origin);
+                }
+                return allowedOrigin === origin;
+            }) || origin.includes('harveygympartner814') && origin.includes('vercel.app');
+            if (isAllowed) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        }
+        else {
+            const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+                'http://localhost:5173',
+                'http://localhost:3000'
+            ];
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        }
+    },
     credentials: true
 }));
 app.use((0, morgan_1.default)('combined'));
