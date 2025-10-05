@@ -39,7 +39,7 @@ app.use((0, cors_1.default)({
                 return allowedOrigin === origin;
             }) || origin.includes('harveygympartner814') && origin.includes('vercel.app');
             if (isAllowed) {
-                callback(null, true);
+                callback(null, origin);
             }
             else {
                 callback(new Error('Not allowed by CORS'));
@@ -51,7 +51,7 @@ app.use((0, cors_1.default)({
                 'http://localhost:3000'
             ];
             if (allowedOrigins.includes(origin)) {
-                callback(null, true);
+                callback(null, origin);
             }
             else {
                 callback(new Error('Not allowed by CORS'));

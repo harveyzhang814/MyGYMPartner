@@ -52,7 +52,7 @@ app.use(cors({
       }) || origin.includes('harveygympartner814') && origin.includes('vercel.app');
       
       if (isAllowed) {
-        callback(null, true);
+        callback(null, origin);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
@@ -64,7 +64,7 @@ app.use(cors({
       ];
       
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
+        callback(null, origin);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
