@@ -40,14 +40,15 @@ MyGYMPartner是一款专为健身爱好者设计的Web端训练计划管理应�
 - **云平台**: Railway (后端) + Vercel (前端)
 - **数据库**: PostgreSQL 15
 
-## 快速开始
+## 🚀 快速开始
 
 ### 环境要求
-- Node.js 18+
-- PostgreSQL 15+
-- Git
+- **Node.js**: 18+ 版本
+- **PostgreSQL**: 15+ 版本  
+- **Git**: 用于克隆项目
+- **操作系统**: macOS 或 Linux
 
-### 安装步骤
+### 一键设置（推荐）
 
 1. **克隆项目**
 ```bash
@@ -55,31 +56,76 @@ git clone <repository-url>
 cd MyGYMPartner
 ```
 
-2. **配置环境变量**
+2. **运行设置脚本**
 ```bash
-# 复制环境变量模板
-cp env.template .env
-
-# 编辑环境变量文件，配置数据库连接等
+# 首次设置本地开发环境
+./setup-local.sh
 ```
 
 3. **启动开发服务器**
 ```bash
-# 启动后端
-cd backend
-npm install
-npm run dev
-
-# 启动前端 (新终端)
-cd frontend
-npm install
-npm run dev
+# 启动前后端服务
+./start-dev.sh
 ```
 
 4. **访问应用**
-- 前端应用: http://localhost:5173
-- 后端API: http://localhost:3001
-- API文档: http://localhost:3001/health
+- 🌐 **前端应用**: http://localhost:5173
+- 🔧 **后端API**: http://localhost:3001
+- ❤️ **健康检查**: http://localhost:3001/health
+
+### 手动设置（高级用户）
+
+如果自动设置脚本遇到问题，可以手动配置：
+
+1. **安装依赖**
+```bash
+# 安装所有项目依赖
+npm run install:all
+```
+
+2. **配置环境变量**
+```bash
+# 后端环境配置
+cp backend/env.local.template backend/.env
+
+# 前端环境配置  
+cp frontend/env.local.template frontend/.env.local
+```
+
+3. **设置数据库**
+```bash
+# 创建数据库
+createdb mygympartner_dev
+
+# 初始化数据库
+cd backend
+npx prisma generate
+npx prisma db push
+npm run db:init
+cd ..
+```
+
+4. **启动服务**
+```bash
+# 方法一：同时启动前后端
+npm run dev
+
+# 方法二：分别启动
+# 终端1: cd backend && npm run dev
+# 终端2: cd frontend && npm run dev
+```
+
+### 验证设置
+
+运行测试脚本验证环境是否正确配置：
+
+```bash
+# 快速测试
+./quick-test.sh
+
+# 完整测试
+./test-connections.sh
+```
 
 ### 本地开发
 
