@@ -28,15 +28,24 @@ class LocalStorageService implements StorageService {
 
   async uploadAvatar(file: Express.Multer.File, userId: string): Promise<StorageResult> {
     try {
-      let finalBuffer = file.buffer;
+      // 在开发环境中，文件已经保存到磁盘，需要读取文件内容
+      let fileBuffer: Buffer;
       let compressionInfo = '';
 
+      if (file.buffer) {
+        // 生产环境：文件在内存中
+        fileBuffer = file.buffer;
+      } else {
+        // 开发环境：文件已保存到磁盘，需要读取
+        fileBuffer = fs.readFileSync(file.path);
+      }
+
       // 检查是否需要压缩
-      if (shouldCompress(file.buffer.length)) {
-        const compressionResult = await smartCompressImage(file.buffer);
+      if (shouldCompress(fileBuffer.length)) {
+        const compressionResult = await smartCompressImage(fileBuffer);
         
         if (compressionResult.success && compressionResult.buffer) {
-          finalBuffer = compressionResult.buffer;
+          fileBuffer = compressionResult.buffer;
           compressionInfo = ` (压缩: ${compressionResult.compressionRatio}%)`;
           console.log(`头像压缩成功: ${compressionResult.originalSize} -> ${compressionResult.compressedSize} bytes${compressionInfo}`);
         } else {
@@ -49,7 +58,12 @@ class LocalStorageService implements StorageService {
       const filepath = path.join(this.uploadDir, filename);
       
       // 写入文件
-      fs.writeFileSync(filepath, finalBuffer);
+      fs.writeFileSync(filepath, fileBuffer);
+      
+      // 如果原始文件在磁盘上，删除临时文件
+      if (file.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
       
       // 生成可访问的URL
       const url = `http://localhost:3001/uploads/avatars/${filename}`;
