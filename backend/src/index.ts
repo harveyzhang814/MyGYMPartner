@@ -109,16 +109,6 @@ app.use('/api/exercise-sessions', exerciseSessionRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/training-plans', trainingPlanRoutes);
 
-// 添加路由调试日志
-console.log('✅ API routes registered:', {
-  auth: '/api/auth',
-  profile: '/api/profile',
-  trainingGroups: '/api/training-groups',
-  exerciseSessions: '/api/exercise-sessions',
-  exercises: '/api/exercises',
-  trainingPlans: '/api/training-plans'
-});
-
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);

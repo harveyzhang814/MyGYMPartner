@@ -11,7 +11,6 @@ const router = Router();
 
 // 所有路由都需要认证
 router.use(authenticate);
-console.log('✅ Profile routes with authentication enabled');
 
 // 获取个人资料
 router.get('/', getProfile);
@@ -24,13 +23,6 @@ router.put('/password', changePassword);
 
 // 获取头像 - 安全访问头像文件
 router.get('/avatar/:userId', async (req: Request, res: Response): Promise<void> => {
-  console.log('🔍 头像获取请求:', {
-    userId: req.params.userId,
-    currentUserId: (req as any).user.id,
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-  
   try {
     const { userId } = req.params;
     const currentUserId = (req as any).user.id;
@@ -50,15 +42,7 @@ router.get('/avatar/:userId', async (req: Request, res: Response): Promise<void>
       select: { avatarUrl: true }
     });
 
-    console.log('📊 数据库查询结果:', {
-      userId,
-      hasUser: !!user,
-      hasAvatarUrl: !!user?.avatarUrl,
-      avatarUrl: user?.avatarUrl
-    });
-
     if (!user || !user.avatarUrl) {
-      console.log('❌ 头像不存在');
       res.status(404).json({
         success: false,
         error: '头像不存在'
@@ -77,10 +61,7 @@ router.get('/avatar/:userId', async (req: Request, res: Response): Promise<void>
 
     // 如果是Supabase存储，生成新的签名URL
     if (user.avatarUrl.includes('supabase')) {
-      console.log('🔧 处理Supabase存储头像');
-      
       if (!supabase) {
-        console.log('❌ Supabase未配置');
         res.status(500).json({
           success: false,
           error: 'Supabase未配置'
@@ -93,19 +74,12 @@ router.get('/avatar/:userId', async (req: Request, res: Response): Promise<void>
       const filename = urlParts[urlParts.length - 1].split('?')[0]; // 移除查询参数
       const filePath = `avatars/${filename}`;
 
-      console.log('📁 文件路径信息:', {
-        originalUrl: user.avatarUrl,
-        urlParts,
-        filename,
-        filePath
-      });
-
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from(STORAGE_CONFIG.BUCKET_NAME)
         .createSignedUrl(filePath, 24 * 60 * 60); // 24小时有效期
 
       if (signedUrlError) {
-        console.error('❌ 生成签名URL失败:', signedUrlError);
+        console.error('生成签名URL失败:', signedUrlError);
         res.status(500).json({
           success: false,
           error: '获取头像失败'
@@ -113,7 +87,6 @@ router.get('/avatar/:userId', async (req: Request, res: Response): Promise<void>
         return;
       }
 
-      console.log('✅ 签名URL生成成功:', signedUrlData.signedUrl);
       res.json({
         success: true,
         data: { url: signedUrlData.signedUrl }
