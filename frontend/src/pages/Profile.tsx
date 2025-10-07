@@ -33,6 +33,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getProfile } from '../store/slices/authSlice';
 import type { AppDispatch, RootState } from '../store';
 import dayjs from 'dayjs';
+import api from '../services/api';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -225,7 +226,7 @@ const Profile: React.FC = () => {
                         name="avatar"
                         listType="text"
                         showUploadList={false}
-                        action="http://localhost:3001/api/profile/upload-avatar"
+                        action={`${api.defaults.baseURL}/profile/upload-avatar`}
                         headers={{
                           'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }}
