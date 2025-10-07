@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 
 // Import routes
@@ -76,6 +77,20 @@ app.use(cors({
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// 静态文件服务 - 根据环境变量控制
+if (process.env.NODE_ENV === 'development' && process.env.AVATAR_UPLOAD_ENABLED === 'true') {
+  app.use('/uploads', (req, res, next) => {
+    // 设置CORS头
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    // 禁用Cross-Origin-Resource-Policy限制
+    res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  }, express.static(path.join(__dirname, 'uploads')));
+  console.log('📁 Static file service enabled for uploads');
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {

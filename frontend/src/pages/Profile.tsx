@@ -28,8 +28,10 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import { profileService, UpdateProfileRequest, ChangePasswordRequest } from '../services/profileService';
-import { User } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { getProfile } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -38,11 +40,12 @@ const { TabPane } = Tabs;
 
 const Profile: React.FC = () => {
   const { t } = useLanguage();
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [profilePopover, setProfilePopover] = useState<{ visible: boolean; type: 'success' | 'error'; message: string }>({ visible: false, type: 'success', message: '' });
   const [passwordPopover, setPasswordPopover] = useState<{ visible: boolean; type: 'success' | 'error'; message: string }>({ visible: false, type: 'success', message: '' });
 
@@ -50,20 +53,10 @@ const Profile: React.FC = () => {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const profileData = await profileService.getProfile();
-      setUser(profileData);
-      form.setFieldsValue({
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        avatarUrl: profileData.avatarUrl,
-        dateOfBirth: profileData.dateOfBirth ? dayjs(profileData.dateOfBirth) : null,
-        gender: profileData.gender,
-        heightCm: profileData.heightCm,
-        weightKg: profileData.weightKg,
-        fitnessLevel: profileData.fitnessLevel,
-        timezone: profileData.timezone,
-        language: profileData.language,
-      });
+      // 从Redux store获取用户数据，如果没有则从API获取
+      if (!user) {
+        await dispatch(getProfile());
+      }
     } catch (error: any) {
       console.error('加载个人资料失败:', error);
     } finally {
@@ -74,6 +67,24 @@ const Profile: React.FC = () => {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  // 监听用户状态变化，更新表单
+  useEffect(() => {
+    if (user) {
+      form.setFieldsValue({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatarUrl: user.avatarUrl,
+        dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
+        gender: user.gender,
+        heightCm: user.heightCm,
+        weightKg: user.weightKg,
+        fitnessLevel: user.fitnessLevel,
+        timezone: user.timezone,
+        language: user.language,
+      });
+    }
+  }, [user, form]);
 
   // 更新个人资料
   const handleUpdateProfile = async (values: UpdateProfileRequest) => {
@@ -117,8 +128,9 @@ const Profile: React.FC = () => {
       
       console.log('发送的数据:', processedValues); // 调试日志
       
-      const updatedUser = await profileService.updateProfile(processedValues);
-      setUser(updatedUser);
+      await profileService.updateProfile(processedValues);
+      // 更新Redux store中的用户状态
+      dispatch(getProfile());
       
       // 显示成功气泡
       setProfilePopover({ visible: true, type: 'success', message: t('profile.saveSuccess') });
@@ -161,12 +173,25 @@ const Profile: React.FC = () => {
 
   // 头像上传
   const handleAvatarUpload = (info: any) => {
+    if (info.file.status === 'uploading') {
+      return;
+    }
+    
     if (info.file.status === 'done') {
-      const avatarUrl = info.file.response?.url;
+      const avatarUrl = info.file.response?.data?.url;
       if (avatarUrl) {
-        form.setFieldsValue({ avatarUrl });
-        setUser(prev => prev ? { ...prev, avatarUrl } : null);
+        // 更新Redux store中的用户状态
+        dispatch(getProfile());
+        setProfilePopover({ visible: true, type: 'success', message: '头像上传成功！' });
+        setTimeout(() => setProfilePopover({ visible: false, type: 'success', message: '' }), 3000);
+      } else {
+        setProfilePopover({ visible: true, type: 'error', message: '头像上传失败：未获取到头像URL' });
+        setTimeout(() => setProfilePopover({ visible: false, type: 'error', message: '' }), 3000);
       }
+    } else if (info.file.status === 'error') {
+      const errorMessage = info.file.error?.message || '头像上传失败，请重试';
+      setProfilePopover({ visible: true, type: 'error', message: errorMessage });
+      setTimeout(() => setProfilePopover({ visible: false, type: 'error', message: '' }), 3000);
     }
   };
 
@@ -200,8 +225,26 @@ const Profile: React.FC = () => {
                         name="avatar"
                         listType="text"
                         showUploadList={false}
+                        action="http://localhost:3001/api/profile/upload-avatar"
+                        headers={{
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }}
                         onChange={handleAvatarUpload}
-                        beforeUpload={() => false} // 暂时禁用实际上传
+                        beforeUpload={(file) => {
+                          const isImage = file.type.startsWith('image/');
+                          if (!isImage) {
+                            setProfilePopover({ visible: true, type: 'error', message: '只能上传图片文件！' });
+                            setTimeout(() => setProfilePopover({ visible: false, type: 'error', message: '' }), 3000);
+                            return false;
+                          }
+                          const isLt5M = file.size / 1024 / 1024 < 5;
+                          if (!isLt5M) {
+                            setProfilePopover({ visible: true, type: 'error', message: '图片大小不能超过5MB！' });
+                            setTimeout(() => setProfilePopover({ visible: false, type: 'error', message: '' }), 3000);
+                            return false;
+                          }
+                          return isImage && isLt5M;
+                        }}
                       >
                         <Button icon={<CameraOutlined />} type="dashed">
                           {t('profile.changeAvatar')}

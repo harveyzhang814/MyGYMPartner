@@ -147,6 +147,7 @@ const Layout: React.FC = () => {
             >
               <Avatar 
                 size="large" 
+                src={user?.avatarUrl}
                 icon={<UserOutlined />}
                 style={{ cursor: 'pointer' }}
               />
