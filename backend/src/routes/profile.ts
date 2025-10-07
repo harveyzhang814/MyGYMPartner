@@ -11,6 +11,7 @@ const router = Router();
 
 // 所有路由都需要认证
 router.use(authenticate);
+console.log('✅ Profile routes with authentication enabled');
 
 // 获取个人资料
 router.get('/', getProfile);
