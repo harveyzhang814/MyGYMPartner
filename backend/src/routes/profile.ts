@@ -21,7 +21,7 @@ router.put('/password', changePassword);
 
 // 头像上传 - 根据环境变量控制
 if (process.env.NODE_ENV === 'development' && process.env.AVATAR_UPLOAD_ENABLED === 'true') {
-  router.post('/upload-avatar', uploadAvatar, async (req: Request, res: Response) => {
+  router.post('/upload-avatar', uploadAvatar, async (req: Request, res: Response): Promise<void> => {
     try {
       if (!req.file) {
         res.status(400).json({ 
