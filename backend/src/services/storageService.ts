@@ -2,6 +2,7 @@ import { supabase, isProduction, STORAGE_CONFIG } from '../config/supabase';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { smartCompressImage, shouldCompress } from '../utils/imageCompression';
 
 export interface StorageResult {
   success: boolean;
@@ -27,12 +28,28 @@ class LocalStorageService implements StorageService {
 
   async uploadAvatar(file: Express.Multer.File, userId: string): Promise<StorageResult> {
     try {
+      let finalBuffer = file.buffer;
+      let compressionInfo = '';
+
+      // 检查是否需要压缩
+      if (shouldCompress(file.buffer.length)) {
+        const compressionResult = await smartCompressImage(file.buffer);
+        
+        if (compressionResult.success && compressionResult.buffer) {
+          finalBuffer = compressionResult.buffer;
+          compressionInfo = ` (压缩: ${compressionResult.compressionRatio}%)`;
+          console.log(`头像压缩成功: ${compressionResult.originalSize} -> ${compressionResult.compressedSize} bytes${compressionInfo}`);
+        } else {
+          console.warn('头像压缩失败，使用原始文件:', compressionResult.error);
+        }
+      }
+
       const ext = path.extname(file.originalname);
       const filename = `avatar-${userId}-${Date.now()}${ext}`;
       const filepath = path.join(this.uploadDir, filename);
       
       // 写入文件
-      fs.writeFileSync(filepath, file.buffer);
+      fs.writeFileSync(filepath, finalBuffer);
       
       // 生成可访问的URL
       const url = `http://localhost:3001/uploads/avatars/${filename}`;
@@ -85,6 +102,22 @@ class SupabaseStorageService implements StorageService {
         };
       }
 
+      let finalBuffer = file.buffer;
+      let compressionInfo = '';
+
+      // 检查是否需要压缩
+      if (shouldCompress(file.buffer.length)) {
+        const compressionResult = await smartCompressImage(file.buffer);
+        
+        if (compressionResult.success && compressionResult.buffer) {
+          finalBuffer = compressionResult.buffer;
+          compressionInfo = ` (压缩: ${compressionResult.compressionRatio}%)`;
+          console.log(`头像压缩成功: ${compressionResult.originalSize} -> ${compressionResult.compressedSize} bytes${compressionInfo}`);
+        } else {
+          console.warn('头像压缩失败，使用原始文件:', compressionResult.error);
+        }
+      }
+
       const ext = path.extname(file.originalname);
       // 使用UUID作为文件名，不暴露用户ID
       const filename = `${uuidv4()}${ext}`;
@@ -93,8 +126,8 @@ class SupabaseStorageService implements StorageService {
       // 上传文件到Supabase Storage
       const { data, error } = await supabase.storage
         .from(STORAGE_CONFIG.BUCKET_NAME)
-        .upload(filePath, file.buffer, {
-          contentType: file.mimetype,
+        .upload(filePath, finalBuffer, {
+          contentType: 'image/jpeg', // 压缩后统一为JPEG格式
           upsert: true
         });
 
