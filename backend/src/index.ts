@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 
 // Import routes
 import authRoutes from './routes/auth';
+import profileRoutes from './routes/profile';
 import trainingGroupRoutes from './routes/trainingGroups';
 import exerciseSessionRoutes from './routes/exerciseSessions';
 import exerciseRoutes from './routes/exercises';
@@ -87,6 +88,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/training-groups', trainingGroupRoutes);
 app.use('/api/exercise-sessions', exerciseSessionRoutes);
 app.use('/api/exercises', exerciseRoutes);

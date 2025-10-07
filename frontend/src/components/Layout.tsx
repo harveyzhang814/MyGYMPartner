@@ -66,11 +66,18 @@ const Layout: React.FC = () => {
     navigate('/login');
   };
 
+  const handleUserMenuClick = ({ key }: { key: string }) => {
+    if (key === 'profile') {
+      navigate('/profile');
+    }
+  };
+
   const userMenuItems = [
     {
       key: 'profile',
       icon: <UserOutlined />,
       label: '个人资料',
+      onClick: () => navigate('/profile'),
     },
     {
       type: 'divider' as const,

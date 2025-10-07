@@ -160,3 +160,22 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
+
+// Profile types
+export interface UpdateProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  heightCm?: number;
+  weightKg?: number;
+  fitnessLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  timezone?: string;
+  language?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
