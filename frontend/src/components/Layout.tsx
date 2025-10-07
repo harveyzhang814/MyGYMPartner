@@ -66,6 +66,12 @@ const Layout: React.FC = () => {
     navigate('/login');
   };
 
+  const handleUserMenuClick = ({ key }: { key: string }) => {
+    if (key === 'profile') {
+      navigate('/profile');
+    }
+  };
+
   const userMenuItems = [
     {
       key: 'profile',
@@ -134,12 +140,13 @@ const Layout: React.FC = () => {
             <Text>{t('dashboard.welcome')}，{user?.firstName || user?.username}！</Text>
             <LanguageSwitcher />
             <Dropdown
-              menu={{ items: userMenuItems }}
+              menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
               placement="bottomRight"
               arrow
             >
               <Avatar 
                 size="large" 
+                src={user?.avatarUrl}
                 icon={<UserOutlined />}
                 style={{ cursor: 'pointer' }}
               />

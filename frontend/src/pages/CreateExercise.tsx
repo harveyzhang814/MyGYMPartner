@@ -36,7 +36,7 @@ const CreateExercise: React.FC = () => {
   const [form] = Form.useForm();
   const [instructions, setInstructions] = useState<string[]>(['']);
   const [instructionsZh, setInstructionsZh] = useState<string[]>(['']);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const isEditMode = Boolean(id) && window.location.pathname.includes('/edit');
   const isDetailMode = Boolean(id) && !isEditMode;
@@ -123,11 +123,11 @@ const CreateExercise: React.FC = () => {
     }
   };
 
-  // 使用多语言预设选项
-  const muscleGroupOptions = getPresetOptions('muscleGroups');
-  const equipmentOptions = getPresetOptions('equipment');
-  const difficultyOptions = getPresetOptions('difficulty');
-  const categoryOptions = getPresetOptions('categories');
+  // 使用多语言预设选项，响应语言变化
+  const muscleGroupOptions = getPresetOptions('muscleGroups', language);
+  const equipmentOptions = getPresetOptions('equipment', language);
+  const difficultyOptions = getPresetOptions('difficulty', language);
+  const categoryOptions = getPresetOptions('categories', language);
 
   return (
     <div>

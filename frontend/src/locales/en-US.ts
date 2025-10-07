@@ -140,6 +140,8 @@ export const enUS = {
     description: 'Browse, create and manage exercises',
     createExercise: 'Create Exercise',
     editExercise: 'Edit Exercise',
+    createExerciseDescription: 'Create a new exercise',
+    editExerciseDescription: 'Edit an existing exercise',
     detailTitle: 'Exercise Details',
     detailDescription: 'View exercise details',
     deleteExercise: 'Delete Exercise',
@@ -407,5 +409,75 @@ export const enUS = {
     noTrainingRecords: 'No Training Records',
     startFirstTraining: 'Start your first training!',
     startTraining: 'Start Training'
+  },
+
+  // Profile Page
+  profile: {
+    title: 'Profile',
+    basicInfo: 'Basic Information',
+    securitySettings: 'Security Settings',
+    changePassword: 'Change Password',
+    changeAvatar: 'Change Avatar',
+    saveChanges: 'Save Changes',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    dateOfBirth: 'Date of Birth',
+    gender: 'Gender',
+    height: 'Height',
+    heightUnit: 'cm',
+    weight: 'Weight',
+    weightUnit: 'kg',
+    fitnessLevel: 'Fitness Level',
+    timezone: 'Timezone',
+    language: 'Language',
+    currentPassword: 'Current Password',
+    newPassword: 'New Password',
+    confirmNewPassword: 'Confirm New Password',
+    selectGender: 'Select Gender',
+    selectFitnessLevel: 'Select Fitness Level',
+    selectTimezone: 'Select Timezone',
+    selectLanguage: 'Select Language',
+    selectDateOfBirth: 'Select Date of Birth',
+    enterFirstName: 'Enter first name',
+    enterLastName: 'Enter last name',
+    enterHeight: 'Enter height',
+    enterWeight: 'Enter weight',
+    enterCurrentPassword: 'Enter current password',
+    enterNewPassword: 'Enter new password',
+    enterConfirmPassword: 'Enter new password again',
+    passwordMinLength: 'Password must be at least 6 characters',
+    newPasswordMinLength: 'Password must be at least 8 characters',
+    passwordComplexity: 'Password must contain uppercase, lowercase letters and numbers',
+    passwordMismatch: 'Passwords do not match',
+    saveSuccess: 'Saved successfully!',
+    saveFailed: 'Save failed, please try again',
+    passwordChangeSuccess: 'Password changed successfully!',
+    passwordChangeFailed: 'Change failed, please try again',
+    loadProfileFailed: 'Failed to load profile',
+    forYourSecurity: 'For your account security, please change your password regularly',
+    // Gender options
+    genderOptions: {
+      male: 'Male',
+      female: 'Female',
+      other: 'Other'
+    },
+    // Fitness level options
+    fitnessLevelOptions: {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced'
+    },
+    // Timezone options
+    timezoneOptions: {
+      asiaShanghai: 'Asia/Shanghai',
+      utc: 'UTC',
+      americaNewYork: 'America/New_York',
+      europeLondon: 'Europe/London'
+    },
+    // Language options
+    languageOptions: {
+      zhCN: '中文',
+      enUS: 'English'
+    }
   }
 };

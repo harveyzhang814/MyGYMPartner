@@ -98,7 +98,9 @@ export const getExercise = async (req: Request, res: Response): Promise<void> =>
         category: true,
         images: true,
         videos: true,
-        gifUrl: true
+        gifUrl: true,
+        isTemplate: true,
+        isPublic: true
       }
     });
 

@@ -140,6 +140,8 @@ export const zhCN = {
     description: '浏览、创建和管理健身动作',
     createExercise: '创建动作',
     editExercise: '编辑动作',
+    createExerciseDescription: '创建新的健身动作',
+    editExerciseDescription: '编辑现有的健身动作',
     detailTitle: '动作详情',
     detailDescription: '查看动作详细信息',
     deleteExercise: '删除动作',
@@ -407,5 +409,75 @@ export const zhCN = {
     noTrainingRecords: '暂无训练记录',
     startFirstTraining: '开始您的第一次训练吧！',
     startTraining: '开始训练'
+  },
+
+  // 个人中心页面
+  profile: {
+    title: '个人中心',
+    basicInfo: '基本信息',
+    securitySettings: '安全设置',
+    changePassword: '修改密码',
+    changeAvatar: '更换头像',
+    saveChanges: '保存更改',
+    firstName: '名字',
+    lastName: '姓氏',
+    dateOfBirth: '出生日期',
+    gender: '性别',
+    height: '身高',
+    heightUnit: 'cm',
+    weight: '体重',
+    weightUnit: 'kg',
+    fitnessLevel: '健身水平',
+    timezone: '时区',
+    language: '语言',
+    currentPassword: '当前密码',
+    newPassword: '新密码',
+    confirmNewPassword: '确认新密码',
+    selectGender: '选择性别',
+    selectFitnessLevel: '选择健身水平',
+    selectTimezone: '选择时区',
+    selectLanguage: '选择语言',
+    selectDateOfBirth: '选择出生日期',
+    enterFirstName: '请输入名字',
+    enterLastName: '请输入姓氏',
+    enterHeight: '请输入身高',
+    enterWeight: '请输入体重',
+    enterCurrentPassword: '请输入当前密码',
+    enterNewPassword: '请输入新密码',
+    enterConfirmPassword: '请再次输入新密码',
+    passwordMinLength: '密码至少6位',
+    newPasswordMinLength: '密码至少8位',
+    passwordComplexity: '密码必须包含大小写字母和数字',
+    passwordMismatch: '两次输入的密码不一致',
+    saveSuccess: '保存成功！',
+    saveFailed: '保存失败，请重试',
+    passwordChangeSuccess: '密码修改成功！',
+    passwordChangeFailed: '修改失败，请重试',
+    loadProfileFailed: '加载个人资料失败',
+    forYourSecurity: '为了您的账户安全，请定期更换密码',
+    // 性别选项
+    genderOptions: {
+      male: '男',
+      female: '女',
+      other: '其他'
+    },
+    // 健身水平选项
+    fitnessLevelOptions: {
+      beginner: '初学者',
+      intermediate: '中级',
+      advanced: '高级'
+    },
+    // 时区选项
+    timezoneOptions: {
+      asiaShanghai: 'Asia/Shanghai',
+      utc: 'UTC',
+      americaNewYork: 'America/New_York',
+      europeLondon: 'Europe/London'
+    },
+    // 语言选项
+    languageOptions: {
+      zhCN: '中文',
+      enUS: 'English'
+    }
   }
 };

@@ -15,7 +15,7 @@ const Exercises: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { exercises, favoriteExercises, loading } = useSelector((state: RootState) => state.exercises);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string | undefined>();
@@ -62,10 +62,10 @@ const Exercises: React.FC = () => {
     }
   };
 
-  // 使用多语言预设选项
-  const muscleGroupOptions = getPresetOptions('muscleGroups');
-  const equipmentOptions = getPresetOptions('equipment');
-  const difficultyOptions = getPresetOptions('difficulty');
+  // 使用多语言预设选项，响应语言变化
+  const muscleGroupOptions = getPresetOptions('muscleGroups', language);
+  const equipmentOptions = getPresetOptions('equipment', language);
+  const difficultyOptions = getPresetOptions('difficulty', language);
 
   return (
     <div>
@@ -213,23 +213,22 @@ const Exercises: React.FC = () => {
                     {exercise.nameZh || exercise.name}
                   </div>
                   <div className="exercise-muscles">
-                    {exercise.muscleGroups.map(group => (
-                      <Tag key={group} color="blue" style={{ marginBottom: 4 }}>
-                        {group === 'chest' ? '胸部' :
-                         group === 'back' ? '背部' :
-                         group === 'legs' ? '腿部' :
-                         group === 'shoulders' ? '肩部' :
-                         group === 'arms' ? '手臂' :
-                         group === 'core' ? '核心' : group}
-                      </Tag>
-                    ))}
+                    {exercise.muscleGroups.map(group => {
+                      // 使用多语言化的肌肉群翻译
+                      const muscleGroupOption = muscleGroupOptions.find(option => option.value === group);
+                      return (
+                        <Tag key={group} color="blue" style={{ marginBottom: 4 }}>
+                          {muscleGroupOption ? muscleGroupOption.label : group}
+                        </Tag>
+                      );
+                    })}
                   </div>
                   <div className="exercise-equipment">
-                    {exercise.equipment === 'barbell' ? '杠铃' :
-                     exercise.equipment === 'dumbbell' ? '哑铃' :
-                     exercise.equipment === 'bodyweight' ? '自重' :
-                     exercise.equipment === 'machine' ? '器械' :
-                     exercise.equipment === 'cable' ? '绳索' : exercise.equipment}
+                    {exercise.equipment ? (() => {
+                      // 使用多语言化的设备翻译
+                      const equipmentOption = equipmentOptions.find(option => option.value === exercise.equipment);
+                      return equipmentOption ? equipmentOption.label : exercise.equipment;
+                    })() : null}
                   </div>
                 </div>
               </Card>

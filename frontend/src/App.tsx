@@ -16,6 +16,7 @@ import CreateExercise from './pages/CreateExercise';
 import Exercises from './pages/Exercises';
 import TrainingPlans from './pages/TrainingPlans';
 import CreateTrainingPlan from './pages/CreateTrainingPlan';
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import { LanguageProvider } from './contexts/LanguageContext';
 import './App.css';
@@ -56,6 +57,7 @@ const App: React.FC = () => {
                 <Route path="training-plans/create" element={<CreateTrainingPlan />} />
                 <Route path="training-plans/:id" element={<CreateTrainingPlan />} />
                 <Route path="training-plans/:id/edit" element={<CreateTrainingPlan />} />
+                <Route path="profile" element={<Profile />} />
               </Route>
               
               {/* Catch all route */}
