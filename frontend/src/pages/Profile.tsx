@@ -7,7 +7,6 @@ import {
   Select,
   DatePicker,
   InputNumber,
-  Avatar,
   Upload,
   Tabs,
   Row,
@@ -34,6 +33,7 @@ import { getProfile } from '../store/slices/authSlice';
 import type { AppDispatch, RootState } from '../store';
 import dayjs from 'dayjs';
 import api from '../services/api';
+import SecureAvatar from '../components/SecureAvatar';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -215,10 +215,8 @@ const Profile: React.FC = () => {
               <Row gutter={16}>
                 <Col span={24} style={{ textAlign: 'center', marginBottom: 24 }}>
                   <Space direction="vertical" size="large">
-                    <Avatar
+                    <SecureAvatar
                       size={120}
-                      src={user?.avatarUrl}
-                      icon={<UserOutlined />}
                       style={{ fontSize: 48 }}
                     />
                     <div>

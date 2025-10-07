@@ -86,7 +86,8 @@ class SupabaseStorageService implements StorageService {
       }
 
       const ext = path.extname(file.originalname);
-      const filename = `avatar-${userId}-${uuidv4()}${ext}`;
+      // 使用UUID作为文件名，不暴露用户ID
+      const filename = `${uuidv4()}${ext}`;
       const filePath = `avatars/${filename}`;
 
       // 上传文件到Supabase Storage
@@ -105,14 +106,22 @@ class SupabaseStorageService implements StorageService {
         };
       }
 
-      // 获取公共URL
-      const { data: urlData } = supabase.storage
+      // 生成带签名的临时URL（24小时有效期）
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from(STORAGE_CONFIG.BUCKET_NAME)
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 24 * 60 * 60); // 24小时
+
+      if (signedUrlError) {
+        console.error('生成签名URL失败:', signedUrlError);
+        return {
+          success: false,
+          error: '生成访问链接失败'
+        };
+      }
 
       return {
         success: true,
-        url: urlData.publicUrl
+        url: signedUrlData.signedUrl
       };
     } catch (error) {
       console.error('Supabase存储上传失败:', error);
