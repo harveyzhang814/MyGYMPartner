@@ -77,7 +77,6 @@ const Layout: React.FC = () => {
       key: 'profile',
       icon: <UserOutlined />,
       label: '个人资料',
-      onClick: () => navigate('/profile'),
     },
     {
       type: 'divider' as const,
@@ -141,7 +140,7 @@ const Layout: React.FC = () => {
             <Text>{t('dashboard.welcome')}，{user?.firstName || user?.username}！</Text>
             <LanguageSwitcher />
             <Dropdown
-              menu={{ items: userMenuItems }}
+              menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
               placement="bottomRight"
               arrow
             >
