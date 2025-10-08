@@ -22,7 +22,9 @@
 
 ### 文档
 - `DEPLOYMENT.md` - 详细部署指南
-- `TESTING-DEPLOYMENT.md` - 测试环境部署指南
+- `STAGING-SETUP-GUIDE.md` - Staging 环境配置详细指南
+- `STAGING-ENV-CHECKLIST.md` - Staging 环境配置清单
+- `staging-env-template.txt` - Staging 环境变量模板
 - `DEPLOYMENT-SUMMARY.md` - 本总结文档
 
 ## 🔧 代码调整总结
