@@ -45,9 +45,6 @@ app.use(cors({
         'https://harveygympartner814.vercel.app'
       ];
       
-      console.log(`[CORS] 环境: ${nodeEnv}, 请求来源: ${origin}`);
-      console.log(`[CORS] 允许的来源:`, allowedOrigins);
-      
       // 检查是否是允许的域名或 Vercel 预览域名
       const isAllowed = allowedOrigins.some(allowedOrigin => {
         if (allowedOrigin.includes('*')) {
@@ -59,10 +56,8 @@ app.use(cors({
       }) || (origin.includes('vercel.app') && origin.startsWith('https://'));
       
       if (isAllowed) {
-        console.log(`[CORS] ✅ 允许来源: ${origin}`);
         callback(null, origin);
       } else {
-        console.log(`[CORS] ❌ 拒绝来源: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     } else {
@@ -72,13 +67,9 @@ app.use(cors({
         'http://localhost:3000'
       ];
       
-      console.log(`[CORS] 开发环境, 请求来源: ${origin}`);
-      
       if (allowedOrigins.includes(origin)) {
-        console.log(`[CORS] ✅ 允许来源: ${origin}`);
         callback(null, origin);
       } else {
-        console.log(`[CORS] ❌ 拒绝来源: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     }
