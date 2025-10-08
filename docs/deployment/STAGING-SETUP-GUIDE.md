@@ -187,41 +187,40 @@ openssl rand -base64 32
 
 在 Vercel 项目的 **Settings** → **Environment Variables** 中添加：
 
-#### 方式一：直接设置环境变量（推荐）
+#### 配置环境变量（推荐方式）
 
 | 变量名 | 值 | 环境 |
 |--------|-----|------|
 | `VITE_API_URL` | `https://backend-staging-production-xxxx.up.railway.app/api` | Preview (staging) |
 
-配置步骤：
-1. 点击 **"Add New"**
-2. **Name**: `VITE_API_URL`
-3. **Value**: 您的 Railway Staging 后端 URL + `/api`
-4. **Environment**: 
-   - ✅ **Preview** (选择 `staging` 分支)
-   - ⬜ Production
-   - ⬜ Development
-5. 点击 **"Save"**
+**配置步骤：**
 
-#### 方式二：使用 vercel.staging.json（如果使用独立项目）
+1. 进入 Vercel 项目的 **Settings** → **Environment Variables**
+2. 点击 **"Add New"**
+3. 配置 Production 环境变量：
+   - **Name**: `VITE_API_URL`
+   - **Value**: `https://mygympartner-production.up.railway.app/api`（生产后端 URL）
+   - **Environment**: ✅ **Production**
+   - 点击 **"Save"**
 
-确保 `frontend/vercel.staging.json` 文件内容正确：
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "env": {
-    "VITE_API_URL": "https://backend-staging-production-xxxx.up.railway.app/api"
-  }
-}
-```
+4. 再次点击 **"Add New"**，配置 Staging 环境变量：
+   - **Name**: `VITE_API_URL`
+   - **Value**: `https://backend-staging-production-xxxx.up.railway.app/api`（Staging 后端 URL）
+   - **Environment**: ✅ **Preview**
+   - **Branch**: 选择 `staging` 分支（或留空应用到所有预览分支）
+   - 点击 **"Save"**
+
+5. （可选）配置本地开发环境变量：
+   - **Name**: `VITE_API_URL`
+   - **Value**: `http://localhost:3001/api`
+   - **Environment**: ✅ **Development**
+   - 点击 **"Save"**
+
+**注意事项：**
+- ✅ 环境变量在 Vercel Dashboard 配置，不在代码中硬编码
+- ✅ 不同环境使用不同的后端 URL
+- ✅ `vercel.json` 只包含构建配置，不包含环境变量
+- ✅ 修改环境变量后需要重新部署才能生效
 
 ### 2.3 配置构建设置
 
@@ -234,26 +233,30 @@ openssl rand -base64 32
 
 ### 2.4 部署 Staging 前端
 
-#### 如果使用现有项目的预览环境
-1. 推送代码到 `staging` 分支：
+#### 如果使用现有项目的预览环境（推荐）
+1. 确保环境变量已配置（上一步）
+2. 推送代码到 `staging` 分支：
    ```bash
    git checkout staging
    git push origin staging
    ```
-2. Vercel 会自动为 `staging` 分支创建预览部署
-3. 在 Vercel 仪表板的 **Deployments** 中找到 staging 分支的部署
-4. 复制预览 URL（格式类似）:
+3. Vercel 会自动为 `staging` 分支创建预览部署
+4. 在 Vercel 仪表板的 **Deployments** 中找到 staging 分支的部署
+5. 复制预览 URL（格式类似）:
    ```
    https://mygympartner-frontend-git-staging-yourname.vercel.app
    ```
+6. 验证环境变量：在部署日志中查看 `VITE_API_URL` 是否正确
 
 #### 如果创建了独立项目
-1. 点击 **"Deploy"**
-2. 等待部署完成
-3. 复制生产 URL（格式类似）:
+1. 确保环境变量已配置（上一步）
+2. 点击 **"Deploy"**
+3. 等待部署完成
+4. 复制生产 URL（格式类似）:
    ```
    https://mygympartner-staging.vercel.app
    ```
+5. 验证环境变量：在部署日志中查看 `VITE_API_URL` 是否正确
 
 ### 2.5 更新后端 CORS 配置
 

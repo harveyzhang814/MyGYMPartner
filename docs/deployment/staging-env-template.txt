@@ -33,13 +33,26 @@ MAX_FILE_SIZE=5242880
 
 
 # ============================================
-# Vercel Staging 环境变量模板
+# Vercel 环境变量配置模板
 # ============================================
 # 在 Vercel 项目 Settings → Environment Variables 中添加
+# 注意：不要在 vercel.json 中硬编码环境变量
 
+# Production 环境变量
+# 变量名: VITE_API_URL
+# 变量值: https://mygympartner-production.up.railway.app/api
+# 环境: Production
+
+# Staging/Preview 环境变量
 # 变量名: VITE_API_URL
 # 变量值: https://backend-staging-production-xxxx.up.railway.app/api
-# 环境: Preview (选择 staging 分支)
+# 环境: Preview
+# 分支: staging（或留空应用到所有预览分支）
+
+# Development 环境变量（可选）
+# 变量名: VITE_API_URL
+# 变量值: http://localhost:3001/api
+# 环境: Development
 
 
 # ============================================

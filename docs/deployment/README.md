@@ -30,7 +30,7 @@
    - 新增文件列表
    - 代码调整总结
 
-### 配置模板
+### 配置模板和说明
 
 5. **[staging-env-template.txt](./staging-env-template.txt)** - Staging 环境变量模板 ⭐ 新增
    - Railway 环境变量模板
@@ -38,6 +38,12 @@
    - Supabase 存储桶策略 SQL
    - 快速验证命令
    - 可直接复制粘贴使用
+
+6. **[VERCEL-CONFIG-EXPLANATION.md](./VERCEL-CONFIG-EXPLANATION.md)** - Vercel 配置说明 ⭐ 新增
+   - 为什么只有一个 `vercel.json` 文件
+   - 配置文件 vs Dashboard 配置的对比
+   - 最佳实践说明
+   - 常见问题解答
 
 ## 🚀 快速开始
 
@@ -137,8 +143,8 @@ main (生产分支)
 - `backend/railway.staging.toml` - Staging 环境配置
 
 ### Vercel 配置
-- `frontend/vercel.json` - 生产环境配置
-- `frontend/vercel.staging.json` - Staging 环境配置
+- `frontend/vercel.json` - 通用构建配置（适用于所有环境）
+- **环境变量在 Vercel Dashboard 中配置**，不在配置文件中硬编码
 
 ### 环境变量模板
 - `backend/env.local.template` - 后端本地开发环境变量模板

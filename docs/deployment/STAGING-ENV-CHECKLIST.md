@@ -62,21 +62,35 @@ MAX_FILE_SIZE=5242880
 ### 方式一：使用预览环境（推荐）
 
 - [ ] 在现有项目的 Settings → Git 中确认 `staging` 分支包含在预览分支中
-- [ ] 在 Settings → Environment Variables 中添加：
+- [ ] 在 Settings → Environment Variables 中添加环境变量：
+  
+  **Production 环境变量：**
+  - Name: `VITE_API_URL`
+  - Value: `https://mygympartner-production.up.railway.app/api`
+  - Environment: ✅ Production
+  
+  **Staging/Preview 环境变量：**
   - Name: `VITE_API_URL`
   - Value: `https://backend-staging-production-xxxx.up.railway.app/api`
-  - Environment: ✅ Preview (选择 staging 分支)
+  - Environment: ✅ Preview
+  - Branch: `staging`（或留空应用到所有预览分支）
+  
 - [ ] 推送代码到 `staging` 分支触发部署
 - [ ] 复制预览 URL
+- [ ] 在部署日志中验证环境变量是否正确
 
 ### 方式二：创建独立项目
 
 - [ ] 创建新项目 `mygympartner-staging`
 - [ ] 设置 Root Directory 为 `frontend`
 - [ ] 设置 Production Branch 为 `staging`
-- [ ] 配置环境变量 `VITE_API_URL`
+- [ ] 在 Settings → Environment Variables 中配置：
+  - Name: `VITE_API_URL`
+  - Value: `https://backend-staging-production-xxxx.up.railway.app/api`
+  - Environment: ✅ Production
 - [ ] 触发部署
 - [ ] 复制生产 URL
+- [ ] 在部署日志中验证环境变量是否正确
 
 ### 更新后端 CORS
 - [ ] 回到 Railway，更新 `CORS_ORIGIN` 为 Vercel Staging URL
