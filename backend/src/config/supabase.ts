@@ -24,11 +24,19 @@ export const supabaseAnon = isSupabaseConfigured
 
 // 环境检测函数
 export const isProduction = () => process.env.NODE_ENV === 'production';
+export const isStaging = () => process.env.NODE_ENV === 'staging';
 export const isDevelopment = () => process.env.NODE_ENV === 'development';
+
+// 是否使用 Supabase 存储（生产环境和 Staging 环境）
+export const useSupabaseStorage = () => isProduction() || isStaging();
 
 // 存储配置
 export const STORAGE_CONFIG = {
-  BUCKET_NAME: 'avatars',
+  // 支持通过环境变量配置存储桶名称
+  // 生产环境: avatars
+  // Staging 环境: avatars-staging
+  // 开发环境: avatars-dev
+  BUCKET_NAME: process.env.SUPABASE_STORAGE_BUCKET || 'avatars',
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 };

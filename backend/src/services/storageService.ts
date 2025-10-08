@@ -1,4 +1,4 @@
-import { supabase, isProduction, STORAGE_CONFIG } from '../config/supabase';
+import { supabase, useSupabaseStorage, STORAGE_CONFIG } from '../config/supabase';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
@@ -222,9 +222,13 @@ class SupabaseStorageService implements StorageService {
 // 存储服务工厂
 export class StorageServiceFactory {
   static create(): StorageService {
-    if (isProduction()) {
+    // 生产环境和 Staging 环境使用 Supabase 存储
+    // 开发环境使用本地存储
+    if (useSupabaseStorage()) {
+      console.log(`使用 Supabase 存储服务，存储桶: ${STORAGE_CONFIG.BUCKET_NAME}`);
       return new SupabaseStorageService();
     } else {
+      console.log('使用本地存储服务');
       return new LocalStorageService();
     }
   }
