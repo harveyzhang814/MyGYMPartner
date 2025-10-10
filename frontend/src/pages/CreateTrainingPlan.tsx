@@ -664,10 +664,12 @@ const CreateTrainingPlan: React.FC = () => {
               )}
             </Form>
           </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
           {isDetailMode && currentTrainingPlan?.exerciseSessions && currentTrainingPlan.exerciseSessions.length > 0 && (
             <Card 
               title={t('trainingPlans.relatedSessions')}
-              style={{ marginTop: 24 }}
               extra={
                 <Text type="secondary">
                   {t('trainingPlans.sessionCount').replace('{count}', String(currentTrainingPlan.exerciseSessions.length))}
@@ -731,10 +733,8 @@ const CreateTrainingPlan: React.FC = () => {
               />
             </Card>
           )}
-        </Col>
-
-        {!isDetailMode && !isEditMode && (
-          <Col xs={24} lg={8}>
+          
+          {!isDetailMode && !isEditMode && (
             <Card title={t('trainingPlans.tipsTitle')}>
               <div style={{ color: '#666' }}>
                 <p>• {t('trainingPlans.tip1')}</p>
@@ -745,8 +745,8 @@ const CreateTrainingPlan: React.FC = () => {
                 <p>• {t('trainingPlans.tip6')}</p>
               </div>
             </Card>
-          </Col>
-        )}
+          )}
+        </Col>
       </Row>
     </div>
   );

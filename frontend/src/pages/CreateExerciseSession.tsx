@@ -521,11 +521,12 @@ const CreateExerciseSession: React.FC = () => {
               )}
             </Form>
           </Card>
-          
+        </Col>
+
+        <Col xs={24} lg={8}>
           {isDetailMode && currentExerciseSession?.trainingPlan && (
             <Card 
               title={t('exerciseSessions.relatedPlan')}
-              style={{ marginTop: 24 }}
               extra={
                 <Button 
                   type="link" 
@@ -578,10 +579,8 @@ const CreateExerciseSession: React.FC = () => {
               </div>
             </Card>
           )}
-        </Col>
-
-        {!isDetailMode && !isEditMode && (
-          <Col xs={24} lg={8}>
+          
+          {!isDetailMode && !isEditMode && (
             <Card title={t('exerciseSessions.tipsTitle')}>
               <div style={{ color: '#666' }}>
                 <p><strong>{t('exerciseSessions.tipsTitle')}</strong></p>
@@ -593,8 +592,8 @@ const CreateExerciseSession: React.FC = () => {
                 <p>• {t('exerciseSessions.tip6')}</p>
               </div>
             </Card>
-          </Col>
-        )}
+          )}
+        </Col>
       </Row>
     </div>
   );
