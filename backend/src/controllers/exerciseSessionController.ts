@@ -499,6 +499,7 @@ export const deleteExerciseSession = async (req: Request, res: Response): Promis
         success: false,
         error: 'Exercise session not found'
       });
+      return;
     }
 
     // Delete session (cascade will handle related records)
@@ -510,11 +511,12 @@ export const deleteExerciseSession = async (req: Request, res: Response): Promis
       success: true,
       message: 'Exercise session deleted successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete exercise session error:', error);
+    console.error('Error message:', error.message);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: error.message || 'Internal server error'
     });
   }
 };
