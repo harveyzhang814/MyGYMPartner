@@ -10,6 +10,8 @@ export const getTrainingPlans = async (req: Request, res: Response): Promise<voi
     const userId = (req as any).user.id;
     const { page = 1, limit = 10, search, status } = req.query;
 
+    console.log('Fetching training plans for user:', userId);
+
     const where: any = {
       userId,
       isActive: true
@@ -60,6 +62,8 @@ export const getTrainingPlans = async (req: Request, res: Response): Promise<voi
       prisma.trainingPlan.count({ where })
     ]);
 
+    console.log('Found', plans.length, 'training plans');
+
     res.json({
       success: true,
       data: plans,
@@ -70,11 +74,13 @@ export const getTrainingPlans = async (req: Request, res: Response): Promise<voi
         totalPages: Math.ceil(total / Number(limit))
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get training plans error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch training plans'
+      error: error.message || 'Failed to fetch training plans'
     });
   }
 };
@@ -180,6 +186,8 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
     const userId = (req as any).user.id;
     const planData: CreateTrainingPlanRequest = req.body;
 
+    console.log('Creating training plan with data:', JSON.stringify(planData, null, 2));
+
     // 创建训练计划及其动作
     const plan = await prisma.trainingPlan.create({
       data: {
@@ -193,9 +201,13 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
       }
     });
 
+    console.log('Training plan created:', plan.id);
+
     // 创建训练计划动作及其训练组
     if (planData.exercises && planData.exercises.length > 0) {
       for (const exerciseData of planData.exercises) {
+        console.log('Creating exercise:', exerciseData.exerciseId);
+        
         // 创建训练计划动作
         const planExercise = await prisma.trainingPlanExercise.create({
           data: {
@@ -203,24 +215,28 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
             exerciseId: exerciseData.exerciseId,
             trainingGroupId: exerciseData.trainingGroupId || null,
             orderIndex: exerciseData.orderIndex,
-            notes: exerciseData.notes
+            notes: exerciseData.notes || null
           }
         });
+
+        console.log('Plan exercise created:', planExercise.id);
 
         // 创建训练组数据
         if (exerciseData.sets && exerciseData.sets.length > 0) {
           const sets = exerciseData.sets.map(set => ({
             trainingPlanExerciseId: planExercise.id,
             setNumber: set.setNumber,
-            reps: set.reps,
-            weight: set.weight,
-            restTimeSeconds: set.restTimeSeconds,
-            notes: set.notes
+            reps: set.reps || null,
+            weight: set.weight || null,
+            restTimeSeconds: set.restTimeSeconds || null,
+            notes: set.notes || null
           }));
 
           await prisma.trainingPlanExerciseSet.createMany({
             data: sets
           });
+          
+          console.log('Created', sets.length, 'sets for exercise');
         }
       }
     }
@@ -266,11 +282,13 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
       data: fullPlan,
       message: 'Training plan created successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create training plan error:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to create training plan'
+      error: error.message || 'Failed to create training plan'
     });
   }
 };

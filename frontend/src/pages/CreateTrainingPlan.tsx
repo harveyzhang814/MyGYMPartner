@@ -113,20 +113,28 @@ const CreateTrainingPlan: React.FC = () => {
 
   const handleSubmit = async (values: TrainingPlanForm) => {
     try {
-      // 构建训练动作数据
-      const exercises = exerciseRecords.map((record, index) => ({
-        exerciseId: record.exerciseId,
-        trainingGroupId: record.trainingGroupId || null,
-        orderIndex: index,
-        notes: undefined,
-        sets: record.sets.map((set, setIndex) => ({
-          setNumber: setIndex + 1,
-          reps: set.reps,
-          weight: set.weight,
-          restTimeSeconds: set.restTime,
-          notes: set.notes
-        }))
-      }));
+      // 构建训练动作数据，过滤掉空的动作
+      const exercises = exerciseRecords
+        .filter(record => record.exerciseId && record.exerciseId.trim() !== '') // 只包含已选择动作的记录
+        .map((record, index) => ({
+          exerciseId: record.exerciseId,
+          trainingGroupId: record.trainingGroupId || null,
+          orderIndex: index,
+          notes: undefined,
+          sets: record.sets.map((set, setIndex) => ({
+            setNumber: setIndex + 1,
+            reps: set.reps,
+            weight: set.weight,
+            restTimeSeconds: set.restTime,
+            notes: set.notes
+          }))
+        }));
+
+      // 如果没有任何有效的动作，给出提示
+      if (exercises.length === 0) {
+        message.error('请至少添加一个训练动作');
+        return;
+      }
 
       const planData: CreateTrainingPlanRequest = {
         name: values.name,
@@ -476,6 +484,14 @@ const CreateTrainingPlan: React.FC = () => {
                         )}
                       </Col>
                     </Row>
+                    
+                    {record.trainingGroupId && (
+                      <div style={{ marginBottom: 16, padding: 8, backgroundColor: '#e6f7ff', borderRadius: 4 }}>
+                        <Text type="secondary">
+                          <ImportOutlined /> {t('trainingPlans.fromTrainingGroup')}: {trainingGroups.find(g => g.id === record.trainingGroupId)?.name}
+                        </Text>
+                      </div>
+                    )}
 
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>

@@ -279,6 +279,7 @@ export const zhCN = {
     relatedSessions: '关联的训练记录',
     noRelatedSessions: '暂无关联的训练记录',
     sessionCount: '共 {count} 次训练',
+    fromTrainingGroup: '来自训练组',
     tipsTitle: '创建提示',
     tipsPlanInfo: '计划信息：',
     tip1: '计划名称是必填项',
