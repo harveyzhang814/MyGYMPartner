@@ -298,7 +298,7 @@ const CreateTrainingPlan: React.FC = () => {
               </Text>
             </div>
           </div>
-          {isDetailMode && (
+          {(isDetailMode || isEditMode) && id && (
             <Button 
               type="primary" 
               size="large"
