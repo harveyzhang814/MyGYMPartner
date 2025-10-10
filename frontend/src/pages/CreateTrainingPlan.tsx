@@ -53,26 +53,21 @@ const CreateTrainingPlan: React.FC = () => {
   const [form] = Form.useForm<TrainingPlanForm>();
   const [selectedTrainingGroups, setSelectedTrainingGroups] = useState<string[]>([]);
   const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
-  const [isDetailMode, setIsDetailMode] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // 根据路径判断页面模式
+  const isEditMode = location.pathname.includes('/edit');
+  const isDetailMode = Boolean(id) && !isEditMode;
 
   useEffect(() => {
-    // 判断页面模式
-    if (location.pathname.includes('/edit')) {
-      setIsEditMode(true);
-    } else if (location.pathname.includes('/') && id && !location.pathname.includes('/edit')) {
-      setIsDetailMode(true);
-    }
-
     // 加载训练组和动作数据
     dispatch(fetchTrainingGroups());
     dispatch(fetchExercises({ page: 1, limit: 100 }));
 
     // 如果是编辑或详情模式，加载训练计划数据
-    if (id && (isEditMode || isDetailMode)) {
+    if (id) {
       dispatch(fetchTrainingPlan(id));
     }
-  }, [dispatch, id, isEditMode, isDetailMode, location.pathname]);
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (currentTrainingPlan && (isEditMode || isDetailMode)) {
