@@ -18,6 +18,7 @@ import { logout } from '../store/slices/authSlice';
 import LanguageSwitcher from './LanguageSwitcher';
 import SecureAvatar from './SecureAvatar';
 import { useLanguage } from '../contexts/LanguageContext';
+import './Layout.css';
 
 const { Header, Sider, Content } = AntLayout;
 const { Text } = Typography;
@@ -91,24 +92,15 @@ const Layout: React.FC = () => {
   ];
 
   return (
-    <AntLayout style={{ minHeight: '100vh' }}>
+    <AntLayout className="layout-container">
       <Sider 
         trigger={null} 
         collapsible 
         collapsed={collapsed}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
-        }}
+        className="layout-sider"
       >
-        <div style={{ 
-          height: 64, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          borderBottom: '1px solid #f0f0f0'
-        }}>
-          <Text strong style={{ fontSize: collapsed ? 16 : 18, color: '#1890ff' }}>
+        <div className="layout-logo">
+          <Text strong className={`layout-logo-text ${collapsed ? 'layout-logo-text-collapsed' : ''}`}>
             {collapsed ? 'MG' : 'MyGYMPartner'}
           </Text>
         </div>
@@ -117,28 +109,23 @@ const Layout: React.FC = () => {
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={handleMenuClick}
-          style={{ border: 'none' }}
+          className="layout-menu"
         />
       </Sider>
       
       <AntLayout>
-        <Header style={{ 
-          background: '#fff', 
-          padding: '0 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        }}>
+        <Header className="layout-header">
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: '16px', width: 64, height: 64 }}
+            className="layout-header-trigger"
           />
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text>{t('dashboard.welcome')}，{user?.firstName || user?.username}！</Text>
+          <div className="layout-header-right">
+            <Text className="layout-header-welcome">
+              {t('dashboard.welcome')}，{user?.firstName || user?.username}！
+            </Text>
             <LanguageSwitcher />
             <Dropdown
               menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
@@ -154,13 +141,7 @@ const Layout: React.FC = () => {
           </div>
         </Header>
         
-        <Content style={{ 
-          margin: '24px 16px',
-          padding: 24,
-          background: '#f5f5f5',
-          minHeight: 'calc(100vh - 112px)',
-          borderRadius: 8,
-        }}>
+        <Content className="layout-content">
           <Outlet />
         </Content>
       </AntLayout>
