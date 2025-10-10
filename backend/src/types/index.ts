@@ -53,10 +53,29 @@ export interface UpdateTrainingGroupRequest extends Partial<CreateTrainingGroupR
 }
 
 // Exercise Session types
+export interface CreateExerciseSessionSet {
+  setNumber: number;
+  reps?: number;
+  weight?: number;
+  restTimeSeconds?: number;
+  isCompleted?: boolean;
+  notes?: string;
+}
+
+export interface CreateExerciseSessionExercise {
+  exerciseId: string;
+  trainingGroupId?: string | null;
+  orderIndex: number;
+  notes?: string;
+  sets: CreateExerciseSessionSet[];
+}
+
 export interface CreateExerciseSessionRequest {
+  name?: string;
   sessionDate: string;
   startTime?: Date;
   notes?: string;
+  exercises?: CreateExerciseSessionExercise[];
 }
 
 export interface CreateExerciseRecordRequest {

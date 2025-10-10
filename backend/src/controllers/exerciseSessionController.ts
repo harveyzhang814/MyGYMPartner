@@ -7,14 +7,63 @@ export const createExerciseSession = async (req: Request, res: Response): Promis
     const userId = (req as any).user.id;
     const sessionData: CreateExerciseSessionRequest = req.body;
 
+    console.log('Creating exercise session with data:', JSON.stringify(sessionData, null, 2));
+
+    // 创建训练记录
     const session = await prisma.exerciseSession.create({
       data: {
-        name: `训练记录 ${new Date().toLocaleDateString()}`, // 自动生成名称
+        name: sessionData.name || `训练记录 ${new Date().toLocaleDateString()}`,
         sessionDate: new Date(sessionData.sessionDate),
         startTime: sessionData.startTime,
         notes: sessionData.notes,
         userId
-      },
+      }
+    });
+
+    console.log('Exercise session created:', session.id);
+
+    // 创建训练动作及其组数
+    if (sessionData.exercises && sessionData.exercises.length > 0) {
+      for (const exerciseData of sessionData.exercises) {
+        console.log('Creating exercise record:', exerciseData.exerciseId);
+        
+        // 创建训练记录项
+        const exerciseRecord = await prisma.exerciseRecord.create({
+          data: {
+            sessionId: session.id,
+            exerciseId: exerciseData.exerciseId,
+            trainingGroupId: exerciseData.trainingGroupId || null,
+            orderIndex: exerciseData.orderIndex,
+            notes: exerciseData.notes || null
+          }
+        });
+
+        console.log('Exercise record created:', exerciseRecord.id);
+
+        // 创建训练组数据
+        if (exerciseData.sets && exerciseData.sets.length > 0) {
+          const sets = exerciseData.sets.map(set => ({
+            exerciseRecordId: exerciseRecord.id,
+            setNumber: set.setNumber,
+            reps: set.reps || null,
+            weight: set.weight || null,
+            restTimeSeconds: set.restTimeSeconds || null,
+            isCompleted: set.isCompleted || false,
+            notes: set.notes || null
+          }));
+
+          await prisma.exerciseSetRecord.createMany({
+            data: sets
+          });
+          
+          console.log('Created', sets.length, 'sets for exercise');
+        }
+      }
+    }
+
+    // 返回完整的训练记录数据
+    const fullSession = await prisma.exerciseSession.findUnique({
+      where: { id: session.id },
       include: {
         exerciseRecords: {
           include: {
@@ -49,14 +98,16 @@ export const createExerciseSession = async (req: Request, res: Response): Promis
 
     res.status(201).json({
       success: true,
-      data: session,
+      data: fullSession,
       message: 'Exercise session created successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create exercise session error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: error.message || 'Internal server error'
     });
   }
 };

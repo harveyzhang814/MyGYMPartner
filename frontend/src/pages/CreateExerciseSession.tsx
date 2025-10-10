@@ -181,27 +181,36 @@ const CreateExerciseSession: React.FC = () => {
 
   const handleSubmit = async (values: ExerciseSessionForm) => {
     try {
-      // 验证所有动作都已选择
-      const hasEmptyExercise = exerciseRecords.some(record => !record.exerciseId);
-      if (hasEmptyExercise) {
-        message.error(t('exerciseSessions.selectAllExercises'));
-        return;
-      }
+      // 构建训练动作数据，过滤掉空的动作
+      const exercises = exerciseRecords
+        .filter(record => record.exerciseId && record.exerciseId.trim() !== '')
+        .map((record, index) => ({
+          exerciseId: record.exerciseId,
+          trainingGroupId: record.trainingGroupId || null,
+          orderIndex: index,
+          notes: undefined,
+          sets: record.sets.map((set, setIndex) => ({
+            setNumber: setIndex + 1,
+            reps: set.reps,
+            weight: set.weight,
+            restTimeSeconds: set.restTime,
+            isCompleted: false,
+            notes: set.notes
+          }))
+        }));
 
-      // 验证所有训练组都有数据
-      const hasEmptySets = exerciseRecords.some(record => 
-        record.sets.some(set => set.reps === 0 || set.weight === 0)
-      );
-      if (hasEmptySets) {
-        message.error(t('exerciseSessions.fillCompleteTrainingData'));
+      // 如果没有任何有效的动作，给出提示
+      if (exercises.length === 0) {
+        message.error('请至少添加一个训练动作');
         return;
       }
 
       const sessionData = {
-        name: values.name || `训练会话 ${values.date.format('YYYY-MM-DD')}`,
+        name: values.name || `训练记录 ${values.date.format('YYYY-MM-DD')}`,
         sessionDate: values.date.format('YYYY-MM-DD'),
         startTime: values.startTime.toDate(),
-        notes: values.notes || values.description
+        notes: values.notes || values.description,
+        exercises: exercises
       };
 
       await dispatch(createExerciseSession(sessionData)).unwrap();
