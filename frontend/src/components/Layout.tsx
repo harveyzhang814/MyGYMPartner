@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout as AntLayout, Menu, Avatar, Dropdown, Button, Typography } from 'antd';
+import { Layout as AntLayout, Menu, Dropdown, Button, Typography } from 'antd';
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { logout } from '../store/slices/authSlice';
 import LanguageSwitcher from './LanguageSwitcher';
+import SecureAvatar from './SecureAvatar';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const { Header, Sider, Content } = AntLayout;
@@ -144,9 +145,8 @@ const Layout: React.FC = () => {
               placement="bottomRight"
               arrow
             >
-              <Avatar 
+              <SecureAvatar 
                 size="large" 
-                src={user?.avatarUrl}
                 icon={<UserOutlined />}
                 style={{ cursor: 'pointer' }}
               />
