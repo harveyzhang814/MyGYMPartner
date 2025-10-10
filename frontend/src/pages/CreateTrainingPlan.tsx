@@ -612,7 +612,7 @@ const CreateTrainingPlan: React.FC = () => {
                           <div>{dayjs(session.sessionDate).format('YYYY-MM-DD')}</div>
                           {session.exerciseRecords && session.exerciseRecords.length > 0 && (
                             <div style={{ marginTop: 8 }}>
-                              {session.exerciseRecords.map((record, idx) => (
+                              {session.exerciseRecords.map((record) => (
                                 <div key={record.id} style={{ fontSize: '12px', color: '#666' }}>
                                   {record.exercise.nameZh || record.exercise.name}
                                   {record.exerciseSetRecords && record.exerciseSetRecords.length > 0 && (

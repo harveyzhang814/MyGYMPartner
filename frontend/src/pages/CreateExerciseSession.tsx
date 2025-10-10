@@ -515,7 +515,7 @@ const CreateExerciseSession: React.FC = () => {
               
               <div style={{ fontSize: '12px', color: '#666', fontFamily: 'monospace' }}>
                 {currentExerciseSession.trainingPlan.trainingPlanGroups && 
-                 currentExerciseSession.trainingPlan.trainingPlanGroups.map((tpg, idx) => {
+                 currentExerciseSession.trainingPlan.trainingPlanGroups.map((tpg) => {
                    const group = tpg.trainingGroup;
                    return (
                      <div key={tpg.id} style={{ marginBottom: 12 }}>

@@ -179,9 +179,11 @@ const TrainingPlans: React.FC = () => {
               >
                 <div className="plan-header">
                   <div className="plan-name">{plan.name}</div>
-                  <div className="plan-date">
-                    {formatDate(plan.startDate)} - {formatDate(plan.endDate)}
-                  </div>
+                  {plan.planDate && (
+                    <div className="plan-date">
+                      {formatDate(plan.planDate)}
+                    </div>
+                  )}
                 </div>
                 <div className="plan-body">
                   <div className="plan-stats">
