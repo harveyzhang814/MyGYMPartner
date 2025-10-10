@@ -190,7 +190,7 @@ class SupabaseStorageService implements StorageService {
 
       // 从URL中提取文件路径
       const urlParts = url.split('/');
-      const filename = urlParts[urlParts.length - 1];
+      const filename = urlParts[urlParts.length - 1].split('?')[0]; // 移除查询参数
       const filePath = `avatars/${filename}`;
 
       // 从Supabase Storage删除文件
