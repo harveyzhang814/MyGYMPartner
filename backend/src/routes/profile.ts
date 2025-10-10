@@ -121,6 +121,14 @@ router.post('/upload-avatar', uploadAvatar, async (req: Request, res: Response):
 
     const userId = (req as any).user.id;
     
+    // 查询用户当前的头像URL
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true }
+    });
+    
+    const oldAvatarUrl = currentUser?.avatarUrl;
+    
     // 使用统一的存储服务上传文件
     const uploadResult = await storageService.uploadAvatar(req.file, userId);
     
@@ -130,6 +138,16 @@ router.post('/upload-avatar', uploadAvatar, async (req: Request, res: Response):
         error: uploadResult.error || '文件上传失败'
       });
       return;
+    }
+
+    // 如果存在旧头像，删除它
+    if (oldAvatarUrl) {
+      const deleteResult = await storageService.deleteAvatar(oldAvatarUrl, userId);
+      if (!deleteResult.success) {
+        console.warn('删除旧头像失败，但不影响新头像使用:', deleteResult.error);
+      } else {
+        console.log('旧头像已删除:', oldAvatarUrl);
+      }
     }
 
     // 更新用户头像URL

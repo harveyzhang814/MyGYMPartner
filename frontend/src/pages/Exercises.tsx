@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Input, Select, Button, Typography, Space, Tag, message, Popconfirm } from 'antd';
-import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -15,6 +15,7 @@ const Exercises: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { exercises, favoriteExercises, loading } = useSelector((state: RootState) => state.exercises);
+  const { user } = useSelector((state: RootState) => state.auth);
   const { t, language } = useLanguage();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,34 +149,53 @@ const Exercises: React.FC = () => {
       ) : exercises.length > 0 ? (
         <Row gutter={[16, 16]}>
           {exercises.map((exercise) => (
-            <Col xs={24} sm={12} lg={8} xl={6} key={exercise.id}>
+            <Col xs={24} lg={12} xl={8} key={exercise.id}>
               <Card
-                className="exercise-card"
+                className="exercise-card exercise-card-horizontal"
                 hoverable
-                cover={
-                  <div className="exercise-image">
-                    {exercise.gifUrl ? (
-                      <img 
-                        src={exercise.gifUrl} 
-                        alt={exercise.nameZh || exercise.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        background: '#f5f5f5',
-                        color: '#8c8c8c'
-                      }}>
-                        暂无图片
+              >
+                <Row gutter={16} align="top">
+                  <Col xs={24} sm={12}>
+                    <div className="exercise-info-left">
+                      <div className="exercise-name">
+                        {exercise.nameZh || exercise.name}
                       </div>
-                    )}
-                  </div>
-                }
-                actions={[
+                      <div className="exercise-muscles">
+                        {exercise.muscleGroups.map(group => {
+                          // 使用多语言化的肌肉群翻译
+                          const muscleGroupOption = muscleGroupOptions.find(option => option.value === group);
+                          return (
+                            <Tag key={group} color="blue" style={{ marginBottom: 4 }}>
+                              {muscleGroupOption ? muscleGroupOption.label : group}
+                            </Tag>
+                          );
+                        })}
+                      </div>
+                      <div className="exercise-equipment">
+                        {exercise.equipment ? (() => {
+                          // 使用多语言化的设备翻译
+                          const equipmentOption = equipmentOptions.find(option => option.value === exercise.equipment);
+                          return equipmentOption ? equipmentOption.label : exercise.equipment;
+                        })() : null}
+                      </div>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <div className="exercise-image-right">
+                      {exercise.gifUrl ? (
+                        <img 
+                          src={exercise.gifUrl} 
+                          alt={exercise.nameZh || exercise.name}
+                        />
+                      ) : (
+                        <div className="exercise-image-placeholder">
+                          暂无图片
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+                <div className="exercise-actions">
                   <Button
                     type="text"
                     icon={isFavorite(exercise.id) ? <StarFilled /> : <StarOutlined />}
@@ -183,14 +203,24 @@ const Exercises: React.FC = () => {
                     style={{ color: isFavorite(exercise.id) ? '#faad14' : undefined }}
                   >
                     {isFavorite(exercise.id) ? t('exercises.favorited') : t('exercises.favorite')}
-                  </Button>,
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
-                  >
-                    {t('common.edit')}
-                  </Button>,
+                  </Button>
+                  {exercise.createdBy === user?.id ? (
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
+                    >
+                      {t('common.edit')}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      onClick={() => navigate(`/exercises/${exercise.id}`)}
+                    >
+                      {t('common.view')}
+                    </Button>
+                  )}
                   <Popconfirm
                     title={t('exercises.deleteConfirm')}
                     description={t('exercises.deleteDescription')}
@@ -206,30 +236,6 @@ const Exercises: React.FC = () => {
                       {t('common.delete')}
                     </Button>
                   </Popconfirm>
-                ]}
-              >
-                <div className="exercise-info">
-                  <div className="exercise-name">
-                    {exercise.nameZh || exercise.name}
-                  </div>
-                  <div className="exercise-muscles">
-                    {exercise.muscleGroups.map(group => {
-                      // 使用多语言化的肌肉群翻译
-                      const muscleGroupOption = muscleGroupOptions.find(option => option.value === group);
-                      return (
-                        <Tag key={group} color="blue" style={{ marginBottom: 4 }}>
-                          {muscleGroupOption ? muscleGroupOption.label : group}
-                        </Tag>
-                      );
-                    })}
-                  </div>
-                  <div className="exercise-equipment">
-                    {exercise.equipment ? (() => {
-                      // 使用多语言化的设备翻译
-                      const equipmentOption = equipmentOptions.find(option => option.value === exercise.equipment);
-                      return equipmentOption ? equipmentOption.label : exercise.equipment;
-                    })() : null}
-                  </div>
                 </div>
               </Card>
             </Col>

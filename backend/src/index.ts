@@ -37,9 +37,11 @@ app.use(cors({
     // 允许没有 origin 的请求（如移动应用、Postman 等）
     if (!origin) return callback(null, true);
     
-    if (process.env.NODE_ENV === 'production') {
-      // 生产环境：允许配置的域名和 Vercel 预览域名
-      const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+    const nodeEnv = process.env.NODE_ENV;
+    
+    if (nodeEnv === 'production' || nodeEnv === 'staging') {
+      // 生产环境和 Staging 环境：允许配置的域名和 Vercel 预览域名
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || [
         'https://harveygympartner814.vercel.app'
       ];
       
@@ -47,11 +49,11 @@ app.use(cors({
       const isAllowed = allowedOrigins.some(allowedOrigin => {
         if (allowedOrigin.includes('*')) {
           // 简单的通配符匹配
-          const pattern = allowedOrigin.replace('*', '.*');
+          const pattern = allowedOrigin.replace(/\*/g, '.*');
           return new RegExp(`^${pattern}$`).test(origin);
         }
         return allowedOrigin === origin;
-      }) || origin.includes('harveygympartner814') && origin.includes('vercel.app');
+      }) || (origin.includes('vercel.app') && origin.startsWith('https://'));
       
       if (isAllowed) {
         callback(null, origin);
@@ -60,7 +62,7 @@ app.use(cors({
       }
     } else {
       // 开发环境：允许 localhost
-      const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || [
         'http://localhost:5173',
         'http://localhost:3000'
       ];

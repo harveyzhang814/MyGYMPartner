@@ -9,45 +9,61 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
+  background-color: transparent;
 }
 
 .App {
   min-height: 100vh;
+  background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 50%, #DEE2E6 100%);
+  background-attachment: fixed;
 }
 
 /* Ant Design customizations */
 .ant-layout {
   min-height: 100vh;
+  background: transparent;
 }
 
 .ant-layout-header {
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid #E9ECEF;
 }
 
 .ant-layout-sider {
-  background: #fff;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.ant-layout-sider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #4A90E2, #17A2B8);
 }
 
 .ant-layout-content {
   padding: 24px;
-  background: #f5f5f5;
+  background: transparent;
   min-height: calc(100vh - 64px);
 }
 
 /* Custom components */
 .page-header {
-  background: #fff;
-  padding: 16px 24px;
+  background: #FFFFFF;
+  padding: 24px 28px;
   margin-bottom: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #4A90E2;
 }
 
 .page-title {
@@ -66,40 +82,415 @@ body {
 .stats-card {
   text-align: center;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4A90E2, #17A2B8);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stats-card:hover::before {
+  opacity: 1;
 }
 
 .stats-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .stats-number {
   font-size: 32px;
   font-weight: 700;
-  color: #1890ff;
   margin-bottom: 8px;
+  color: #4A90E2;
 }
 
 .stats-label {
-  color: #8c8c8c;
+  color: #6C757D;
   font-size: 14px;
+  font-weight: 500;
+}
+
+/* 特定统计卡片颜色 */
+.stats-card:nth-child(1) .stats-number,
+.stats-card:nth-child(1) .ant-statistic-content-value {
+  color: #4A90E2;
+}
+
+.stats-card:nth-child(2) .stats-number,
+.stats-card:nth-child(2) .ant-statistic-content-value {
+  color: #28A745;
+}
+
+.stats-card:nth-child(3) .stats-number,
+.stats-card:nth-child(3) .ant-statistic-content-value {
+  color: #FD7E14;
+}
+
+.stats-card:nth-child(4) .stats-number,
+.stats-card:nth-child(4) .ant-statistic-content-value {
+  color: #6F42C1;
+}
+
+/* 为图标添加颜色 */
+.ant-statistic-content-prefix {
+  color: inherit;
+}
+
+/* 为 Ant Design 按钮添加运动风格 */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #4A90E2, #357ABD);
+  border: none;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background: linear-gradient(135deg, #7BB3F0, #4A90E2);
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.35);
+  transform: translateY(-2px);
+}
+
+.ant-btn-default {
+  border: 2px solid #4A90E2;
+  color: #4A90E2;
+  background: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-default:hover,
+.ant-btn-default:focus {
+  border-color: #17A2B8;
+  color: #17A2B8;
+  background: rgba(23, 162, 184, 0.05);
+}
+
+/* 为卡片标题添加样式 */
+.ant-card {
+  border-radius: 12px;
+  border: 1px solid #E9ECEF;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #E9ECEF;
+  font-weight: 600;
+}
+
+.ant-card-head-title {
+  color: #262626;
+  font-weight: 600;
+}
+
+/* Tag 组件样式 */
+.ant-tag {
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 500;
+  border: none;
+}
+
+.ant-tag-success {
+  background: #E8F5E8;
+  color: #28A745;
+}
+
+.ant-tag-processing {
+  background: #E3F2FD;
+  color: #4A90E2;
+}
+
+.ant-tag-warning {
+  background: #FFF3CD;
+  color: #FD7E14;
+}
+
+.ant-tag-default {
+  background: #F8F9FA;
+  color: #6C757D;
+}
+
+/* Avatar 组件样式 */
+.ant-avatar {
+  transition: all 0.3s ease;
+}
+
+.ant-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
+}
+
+/* List 组件样式 */
+.ant-list-item {
+  padding: 16px;
+  border-bottom: 1px solid rgba(240, 240, 240, 0.6);
+  transition: all 0.3s ease;
+}
+
+.ant-list-item:hover {
+  background: rgba(74, 144, 226, 0.03);
+  border-radius: 8px;
+}
+
+.ant-list-item:last-child {
+  border-bottom: none;
+}
+
+/* 为 Empty 组件添加样式 */
+.ant-empty {
+  color: #8c8c8c;
+}
+
+.ant-empty-description {
+  color: #8c8c8c;
+}
+
+/* Input 组件样式 */
+.ant-input,
+.ant-input-number,
+.ant-picker,
+.ant-select-selector {
+  border-radius: 8px;
+  border: 1px solid #DEE2E6;
+  transition: all 0.3s ease;
+}
+
+.ant-input:hover,
+.ant-input-number:hover,
+.ant-picker:hover,
+.ant-select:hover .ant-select-selector {
+  border-color: #7BB3F0;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number:focus,
+.ant-input-number-focused,
+.ant-picker-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+/* Search 输入框 */
+.ant-input-search .ant-input-group-addon .ant-btn {
+  background: linear-gradient(135deg, #4A90E2, #17A2B8);
+  border: none;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Select 下拉框 */
+.ant-select-dropdown {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.ant-select-item-option-selected {
+  background: rgba(74, 144, 226, 0.1);
+  color: #4A90E2;
+  font-weight: 600;
+}
+
+.ant-select-item-option-active {
+  background: rgba(74, 144, 226, 0.05);
+}
+
+/* Modal 弹窗样式 */
+.ant-modal-content {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.ant-modal-header {
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #E9ECEF;
+}
+
+.ant-modal-title {
+  color: #262626;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid #E9ECEF;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Dropdown 下拉菜单样式 */
+.ant-dropdown {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.ant-dropdown-menu {
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.ant-dropdown-menu-item:hover {
+  background: rgba(74, 144, 226, 0.05);
+}
+
+.ant-dropdown-menu-item-selected {
+  background: rgba(74, 144, 226, 0.1);
+  color: #4A90E2;
+  font-weight: 600;
 }
 
 /* Exercise card */
 .exercise-card {
   border-radius: 12px;
   overflow: hidden;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .exercise-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
+/* 水平布局样式 */
+.exercise-card-horizontal .ant-card-body {
+  padding: 16px;
+}
+
+.exercise-info-left {
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 100%;
+}
+
+.exercise-info-left .exercise-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.exercise-info-left .exercise-muscles {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.exercise-info-left .exercise-equipment {
+  color: #4A90E2;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+}
+
+.exercise-info-left .exercise-equipment::before {
+  content: '🏋️';
+  margin-right: 6px;
+}
+
+/* 右侧图片区域 */
+.exercise-image-right {
+  width: 100%;
+  min-height: 160px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F9FA;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.exercise-image-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.exercise-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F9FA;
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+/* 操作按钮区域 */
+.exercise-actions {
+  padding: 12px 0 0 0;
+  border-top: 1px solid #E9ECEF;
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exercise-actions .ant-btn {
+  flex: 1;
+  min-width: 80px;
+}
+
+/* 响应式设计 */
+@media (max-width: 576px) {
+  .exercise-card-horizontal .ant-row {
+    flex-direction: column-reverse;
+  }
+  
+  .exercise-image-right {
+    height: 200px;
+  }
+  
+  .exercise-info-left {
+    padding-right: 0;
+    padding-bottom: 8px;
+  }
+  
+  .exercise-info-left .exercise-name {
+    font-size: 16px;
+  }
+  
+  .exercise-actions .ant-btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* 保留旧的垂直布局样式，以防其他地方使用 */
 .exercise-image {
   width: 100%;
   height: 200px;
@@ -125,7 +516,7 @@ body {
 }
 
 .exercise-equipment {
-  color: #1890ff;
+  color: #4A90E2;
   font-size: 12px;
   font-weight: 500;
 }
@@ -134,29 +525,34 @@ body {
 .training-group-card {
   border-radius: 12px;
   overflow: hidden;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .training-group-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .training-group-header {
-  padding: 16px;
-  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  padding: 20px;
+  background: linear-gradient(135deg, #4A90E2 0%, #17A2B8 100%);
   color: white;
+  position: relative;
 }
 
 .training-group-name {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 4px;
+  color: white;
 }
 
 .training-group-exercise {
   font-size: 14px;
   opacity: 0.9;
+  color: white;
 }
 
 .training-group-body {
@@ -188,29 +584,33 @@ body {
 .session-card {
   border-radius: 12px;
   overflow: hidden;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .session-header {
-  padding: 16px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 20px;
+  background: linear-gradient(135deg, #17A2B8 0%, #6F42C1 100%);
+  color: white;
+  position: relative;
+  border-bottom: none;
 }
 
 .session-name {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: white;
   margin-bottom: 4px;
 }
 
 .session-date {
-  color: #8c8c8c;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
 }
 
@@ -241,28 +641,30 @@ body {
 
 /* Status badges */
 .status-badge {
-  border-radius: 12px;
-  padding: 4px 8px;
+  border-radius: 16px;
+  padding: 6px 12px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-completed {
-  background: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
+  background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+  color: #26A69A;
+  border: 1px solid #26A69A;
 }
 
 .status-in-progress {
-  background: #e6f7ff;
-  color: #1890ff;
-  border: 1px solid #91d5ff;
+  background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+  color: #2196F3;
+  border: 1px solid #2196F3;
 }
 
 .status-paused {
-  background: #fff7e6;
-  color: #fa8c16;
-  border: 1px solid #ffd591;
+  background: linear-gradient(135deg, #EDE7F6, #D1C4E9);
+  color: #5E35B1;
+  border: 1px solid #5E35B1;
 }
 
 /* Responsive design */

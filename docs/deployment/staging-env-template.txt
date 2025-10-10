@@ -1,0 +1,143 @@
+# ============================================
+# Railway Staging 环境变量模板
+# ============================================
+# 复制以下内容到 Railway backend-staging 服务的环境变量配置中
+
+# 环境标识
+NODE_ENV=staging
+
+# 服务端口
+PORT=3001
+
+# 数据库连接（从 Railway PostgreSQL Staging 服务复制）
+DATABASE_URL=postgresql://postgres:xxx@xxx.railway.app:5432/railway
+
+# JWT 密钥（运行命令生成: openssl rand -base64 32）
+JWT_SECRET=your-staging-jwt-secret-key-here
+
+# CORS 配置（填写 Vercel Staging 前端 URL）
+CORS_ORIGIN=https://your-app-staging.vercel.app
+
+# Supabase 配置（从 Supabase Dashboard → Settings → API 复制）
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_ANON_KEY=eyJxxx...
+SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
+
+# Supabase 存储桶（Staging 专用）
+SUPABASE_STORAGE_BUCKET=avatars-staging
+
+# 可选配置
+LOG_LEVEL=debug
+AVATAR_UPLOAD_ENABLED=true
+MAX_FILE_SIZE=5242880
+
+
+# ============================================
+# Vercel 环境变量配置模板
+# ============================================
+# 在 Vercel 项目 Settings → Environment Variables 中添加
+# 注意：不要在 vercel.json 中硬编码环境变量
+
+# Production 环境变量
+# 变量名: VITE_API_URL
+# 变量值: https://mygympartner-production.up.railway.app/api
+# 环境: Production
+
+# Staging/Preview 环境变量
+# 变量名: VITE_API_URL
+# 变量值: https://backend-staging-production-xxxx.up.railway.app/api
+# 环境: Preview
+# 分支: staging（或留空应用到所有预览分支）
+
+# Development 环境变量（可选）
+# 变量名: VITE_API_URL
+# 变量值: http://localhost:3001/api
+# 环境: Development
+
+
+# ============================================
+# 生成 JWT Secret 的命令
+# ============================================
+# 在本地终端运行以下命令生成强密钥：
+# openssl rand -base64 32
+
+
+# ============================================
+# 快速验证命令
+# ============================================
+
+# 1. 测试后端健康检查
+# curl https://backend-staging-production-xxxx.up.railway.app/health
+
+# 2. 测试注册 API
+# curl -X POST https://backend-staging-production-xxxx.up.railway.app/api/auth/register \
+#   -H "Content-Type: application/json" \
+#   -d '{"email":"test@example.com","username":"testuser","password":"Test123456"}'
+
+# 3. 测试登录 API
+# curl -X POST https://backend-staging-production-xxxx.up.railway.app/api/auth/login \
+#   -H "Content-Type: application/json" \
+#   -d '{"email":"test@example.com","password":"Test123456"}'
+
+
+# ============================================
+# Railway Shell 命令（初始化数据库）
+# ============================================
+
+# 1. 运行数据库迁移
+# npx prisma migrate deploy
+
+# 2. 生成 Prisma Client
+# npx prisma generate
+
+# 3. 测试数据库连接
+# npx prisma db execute --stdin <<< "SELECT 1;"
+
+
+# ============================================
+# Supabase 存储桶策略 SQL
+# ============================================
+
+# 策略 1: 允许认证用户上传自己的头像
+CREATE POLICY "Allow authenticated users to upload their own avatar"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'avatars-staging' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+# 策略 2: 允许认证用户更新自己的头像
+CREATE POLICY "Allow authenticated users to update their own avatar"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'avatars-staging' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+# 策略 3: 允许认证用户删除自己的头像
+CREATE POLICY "Allow authenticated users to delete their own avatar"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'avatars-staging' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+# 策略 4: 允许公开读取
+CREATE POLICY "Allow public read access"
+ON storage.objects FOR SELECT
+TO public, authenticated
+USING (bucket_id = 'avatars-staging');
+
+
+# ============================================
+# 重要提醒
+# ============================================
+
+# ✅ 确保 Staging 和生产环境使用不同的 JWT_SECRET
+# ✅ 确保 DATABASE_URL 指向 Staging 数据库，不是生产数据库
+# ✅ 确保 SUPABASE_STORAGE_BUCKET 设置为 avatars-staging
+# ✅ 确保 CORS_ORIGIN 设置为 Staging 前端 URL
+# ✅ 部署后测试所有核心功能

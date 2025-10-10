@@ -10,8 +10,7 @@
 - `railway.toml` - Railway 后端部署配置
 - `backend/railway.toml` - 后端专用 Railway 配置
 - `backend/railway.staging.toml` - 测试环境 Railway 配置
-- `frontend/vercel.json` - Vercel 前端部署配置
-- `frontend/vercel.staging.json` - 测试环境 Vercel 配置
+- `frontend/vercel.json` - Vercel 前端部署配置（通用构建配置）
 
 ### 环境变量配置
 - `env.template` - 环境变量模板文件
@@ -22,7 +21,9 @@
 
 ### 文档
 - `DEPLOYMENT.md` - 详细部署指南
-- `TESTING-DEPLOYMENT.md` - 测试环境部署指南
+- `STAGING-SETUP-GUIDE.md` - Staging 环境配置详细指南
+- `STAGING-ENV-CHECKLIST.md` - Staging 环境配置清单
+- `staging-env-template.txt` - Staging 环境变量模板
 - `DEPLOYMENT-SUMMARY.md` - 本总结文档
 
 ## 🔧 代码调整总结
