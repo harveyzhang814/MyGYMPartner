@@ -119,6 +119,22 @@ export interface ExerciseSearchParams extends PaginationParams {
 }
 
 // Training Plan types
+export interface CreateTrainingPlanExerciseSet {
+  setNumber: number;
+  reps?: number;
+  weight?: number;
+  restTimeSeconds?: number;
+  notes?: string;
+}
+
+export interface CreateTrainingPlanExercise {
+  exerciseId: string;
+  trainingGroupId?: string | null;
+  orderIndex: number;
+  notes?: string;
+  sets: CreateTrainingPlanExerciseSet[];
+}
+
 export interface CreateTrainingPlanRequest {
   name: string;
   description?: string;
@@ -126,7 +142,7 @@ export interface CreateTrainingPlanRequest {
   planDate?: string;
   isTemplate?: boolean;
   isPublic?: boolean;
-  trainingGroupIds?: string[];
+  exercises: CreateTrainingPlanExercise[];
 }
 
 export interface UpdateTrainingPlanRequest extends Partial<CreateTrainingPlanRequest> {

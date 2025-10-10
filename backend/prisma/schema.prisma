@@ -61,6 +61,7 @@ model Exercise {
   exerciseRecords       ExerciseRecord[]
   creator               User?                  @relation(fields: [createdBy], references: [id])
   trainingGroups        TrainingGroup[]
+  trainingPlanExercises TrainingPlanExercise[]
   userFavoriteExercises UserFavoriteExercise[]
 
   @@map("exercises")
@@ -79,27 +80,27 @@ model UserFavoriteExercise {
 }
 
 model TrainingGroup {
-  id                 String              @id @default(uuid())
-  userId             String              @map("user_id")
-  name               String
-  exerciseId         String              @map("exercise_id")
-  description        String?
-  sets               Int
-  repsMin            Int?                @map("reps_min")
-  repsMax            Int?                @map("reps_max")
-  weightMin          Decimal?            @map("weight_min") @db.Decimal(8, 2)
-  weightMax          Decimal?            @map("weight_max") @db.Decimal(8, 2)
-  restTimeSeconds    Int                 @default(120) @map("rest_time_seconds")
-  notes              String?
-  isTemplate         Boolean             @default(false) @map("is_template")
-  tags               String[]
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  exerciseRecords    ExerciseRecord[]
-  trainingGroupSets  TrainingGroupSet[]
-  exercise           Exercise            @relation(fields: [exerciseId], references: [id])
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trainingPlanGroups TrainingPlanGroup[]
+  id                    String                 @id @default(uuid())
+  userId                String                 @map("user_id")
+  name                  String
+  exerciseId            String                 @map("exercise_id")
+  description           String?
+  sets                  Int
+  repsMin               Int?                   @map("reps_min")
+  repsMax               Int?                   @map("reps_max")
+  weightMin             Decimal?               @map("weight_min") @db.Decimal(8, 2)
+  weightMax             Decimal?               @map("weight_max") @db.Decimal(8, 2)
+  restTimeSeconds       Int                    @default(120) @map("rest_time_seconds")
+  notes                 String?
+  isTemplate            Boolean                @default(false) @map("is_template")
+  tags                  String[]
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  exerciseRecords       ExerciseRecord[]
+  trainingGroupSets     TrainingGroupSet[]
+  exercise              Exercise               @relation(fields: [exerciseId], references: [id])
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlanExercises TrainingPlanExercise[]
 
   @@map("training_groups")
 }
@@ -142,7 +143,7 @@ model ExerciseSession {
 model ExerciseRecord {
   id                 String              @id @default(uuid())
   sessionId          String              @map("session_id")
-  trainingGroupId    String              @map("training_group_id")
+  trainingGroupId    String?             @map("training_group_id")
   exerciseId         String              @map("exercise_id")
   orderIndex         Int                 @map("order_index")
   notes              String?
@@ -150,7 +151,7 @@ model ExerciseRecord {
   updatedAt          DateTime            @updatedAt @map("updated_at")
   exercise           Exercise            @relation(fields: [exerciseId], references: [id])
   session            ExerciseSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  trainingGroup      TrainingGroup       @relation(fields: [trainingGroupId], references: [id])
+  trainingGroup      TrainingGroup?      @relation(fields: [trainingGroupId], references: [id])
   exerciseSetRecords ExerciseSetRecord[]
 
   @@unique([sessionId, orderIndex])
@@ -174,35 +175,55 @@ model ExerciseSetRecord {
 }
 
 model TrainingPlan {
-  id                 String              @id @default(uuid())
-  userId             String              @map("user_id")
-  name               String
-  description        String?
-  status             PlanStatus          @default(DRAFT)
-  planDate           DateTime?           @map("plan_date") @db.Date
-  isTemplate         Boolean             @default(false) @map("is_template")
-  isPublic           Boolean             @default(false) @map("is_public")
-  isActive           Boolean             @default(true) @map("is_active")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  exerciseSessions   ExerciseSession[]
-  trainingPlanGroups TrainingPlanGroup[]
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String                 @id @default(uuid())
+  userId                String                 @map("user_id")
+  name                  String
+  description           String?
+  status                PlanStatus             @default(DRAFT)
+  planDate              DateTime?              @map("plan_date") @db.Date
+  isTemplate            Boolean                @default(false) @map("is_template")
+  isPublic              Boolean                @default(false) @map("is_public")
+  isActive              Boolean                @default(true) @map("is_active")
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  exerciseSessions      ExerciseSession[]
+  trainingPlanExercises TrainingPlanExercise[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("training_plans")
 }
 
-model TrainingPlanGroup {
-  id              String        @id @default(uuid())
-  trainingPlanId  String        @map("training_plan_id")
-  trainingGroupId String        @map("training_group_id")
-  orderIndex      Int           @map("order_index")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  trainingGroup   TrainingGroup @relation(fields: [trainingGroupId], references: [id], onDelete: Cascade)
-  trainingPlan    TrainingPlan  @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+model TrainingPlanExercise {
+  id                       String                    @id @default(uuid())
+  trainingPlanId           String                    @map("training_plan_id")
+  exerciseId               String                    @map("exercise_id")
+  trainingGroupId          String?                   @map("training_group_id")
+  orderIndex               Int                       @map("order_index")
+  notes                    String?
+  createdAt                DateTime                  @default(now()) @map("created_at")
+  updatedAt                DateTime                  @updatedAt @map("updated_at")
+  exercise                 Exercise                  @relation(fields: [exerciseId], references: [id])
+  trainingGroup            TrainingGroup?            @relation(fields: [trainingGroupId], references: [id])
+  trainingPlan             TrainingPlan              @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  trainingPlanExerciseSets TrainingPlanExerciseSet[]
 
   @@unique([trainingPlanId, orderIndex])
-  @@map("training_plan_groups")
+  @@map("training_plan_exercises")
+}
+
+model TrainingPlanExerciseSet {
+  id                     String               @id @default(uuid())
+  trainingPlanExerciseId String               @map("training_plan_exercise_id")
+  setNumber              Int                  @map("set_number")
+  reps                   Int?
+  weight                 Decimal?             @db.Decimal(8, 2)
+  restTimeSeconds        Int?                 @map("rest_time_seconds")
+  notes                  String?
+  createdAt              DateTime             @default(now()) @map("created_at")
+  trainingPlanExercise   TrainingPlanExercise @relation(fields: [trainingPlanExerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingPlanExerciseId, setNumber])
+  @@map("training_plan_exercise_sets")
 }
 
 enum Gender {

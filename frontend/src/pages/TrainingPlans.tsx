@@ -189,7 +189,7 @@ const TrainingPlans: React.FC = () => {
                   <div className="plan-stats">
                     <div className="plan-stat">
                       <div className="plan-stat-value">
-                        {plan._count.trainingPlanGroups}
+                        {plan._count.trainingPlanExercises}
                       </div>
                       <div className="plan-stat-label">{t('trainingPlans.trainingGroups')}</div>
                     </div>

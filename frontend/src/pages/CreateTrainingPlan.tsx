@@ -91,30 +91,19 @@ const CreateTrainingPlan: React.FC = () => {
       });
       
       // 根据训练计划数据生成动作记录
-      if (currentTrainingPlan.trainingPlanGroups && currentTrainingPlan.trainingPlanGroups.length > 0) {
-        const records: ExerciseRecord[] = currentTrainingPlan.trainingPlanGroups.map(tpg => {
-          const group = tpg.trainingGroup;
-          const sets = [];
-          const repsMin = group.repsMin || 10;
-          const repsMax = group.repsMax || 12;
-          const weightMin = group.weightMin || 0;
-          const weightMax = group.weightMax || 0;
-          const restTime = group.restTimeSeconds || 60;
-
-          // 生成训练组数据
-          for (let i = 0; i < (group.sets || 1); i++) {
-            sets.push({
-              reps: Math.floor(repsMin + (repsMax - repsMin) * Math.random()),
-              weight: weightMin + (weightMax - weightMin) * Math.random(),
-              restTime: restTime,
-              notes: ''
-            });
-          }
+      if (currentTrainingPlan.trainingPlanExercises && currentTrainingPlan.trainingPlanExercises.length > 0) {
+        const records: ExerciseRecord[] = currentTrainingPlan.trainingPlanExercises.map(planExercise => {
+          const sets = planExercise.trainingPlanExerciseSets.map(set => ({
+            reps: set.reps || 0,
+            weight: set.weight || 0,
+            restTime: set.restTimeSeconds || 60,
+            notes: set.notes || ''
+          }));
 
           return {
-            exerciseId: group.exerciseId,
-            trainingGroupId: group.id,
-            sets: sets
+            exerciseId: planExercise.exerciseId,
+            trainingGroupId: planExercise.trainingGroupId || undefined,
+            sets: sets.length > 0 ? sets : [{ reps: 10, weight: 0, restTime: 60, notes: '' }]
           };
         });
         setExerciseRecords(records);
@@ -124,10 +113,20 @@ const CreateTrainingPlan: React.FC = () => {
 
   const handleSubmit = async (values: TrainingPlanForm) => {
     try {
-      // 从动作记录中提取训练组ID
-      const trainingGroupIds = exerciseRecords
-        .filter(record => record.trainingGroupId)
-        .map(record => record.trainingGroupId!);
+      // 构建训练动作数据
+      const exercises = exerciseRecords.map((record, index) => ({
+        exerciseId: record.exerciseId,
+        trainingGroupId: record.trainingGroupId || null,
+        orderIndex: index,
+        notes: undefined,
+        sets: record.sets.map((set, setIndex) => ({
+          setNumber: setIndex + 1,
+          reps: set.reps,
+          weight: set.weight,
+          restTimeSeconds: set.restTime,
+          notes: set.notes
+        }))
+      }));
 
       const planData: CreateTrainingPlanRequest = {
         name: values.name,
@@ -136,7 +135,7 @@ const CreateTrainingPlan: React.FC = () => {
         planDate: values.planDate?.format('YYYY-MM-DD'),
         isTemplate: values.isTemplate,
         isPublic: values.isPublic,
-        trainingGroupIds: trainingGroupIds
+        exercises: exercises
       };
 
       if (isEditMode && id) {
@@ -164,22 +163,32 @@ const CreateTrainingPlan: React.FC = () => {
       const group = trainingGroups.find(g => g.id === groupId);
       if (!group) return null;
 
-      // 根据训练组数据生成训练组设置
-      const sets = [];
-      const repsMin = group.repsMin || 10;
-      const repsMax = group.repsMax || 12;
-      const weightMin = group.weightMin || 0;
-      const weightMax = group.weightMax || 0;
-      const restTime = group.restTimeSeconds || 60;
+      let sets = [];
+      
+      // 优先使用训练组的预设数据
+      if (group.trainingGroupSets && group.trainingGroupSets.length > 0) {
+        sets = group.trainingGroupSets.map(set => ({
+          reps: set.reps || 0,
+          weight: set.weight || 0,
+          restTime: set.restTimeSeconds || 60,
+          notes: set.notes || ''
+        }));
+      } else {
+        // 如果没有预设数据，使用范围生成
+        const repsMin = group.repsMin || 10;
+        const repsMax = group.repsMax || 12;
+        const weightMin = group.weightMin || 0;
+        const weightMax = group.weightMax || 0;
+        const restTime = group.restTimeSeconds || 60;
 
-      // 生成训练组数据
-      for (let i = 0; i < (group.sets || 1); i++) {
-        sets.push({
-          reps: Math.floor(repsMin + (repsMax - repsMin) * Math.random()),
-          weight: weightMin + (weightMax - weightMin) * Math.random(),
-          restTime: restTime,
-          notes: ''
-        });
+        for (let i = 0; i < (group.sets || 1); i++) {
+          sets.push({
+            reps: Math.floor(repsMin + (repsMax - repsMin) * Math.random()),
+            weight: weightMin + (weightMax - weightMin) * Math.random(),
+            restTime: restTime,
+            notes: ''
+          });
+        }
       }
 
       return {

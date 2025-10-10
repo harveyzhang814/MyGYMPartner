@@ -115,20 +115,53 @@ export interface TrainingPlan {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  trainingPlanGroups: TrainingPlanGroup[];
+  trainingPlanExercises: TrainingPlanExercise[];
   exerciseSessions?: ExerciseSession[];
   _count: {
-    trainingPlanGroups: number;
+    trainingPlanExercises: number;
     exerciseSessions?: number;
   };
 }
 
-export interface TrainingPlanGroup {
+export interface TrainingPlanExerciseSet {
+  id: string;
+  trainingPlanExerciseId: string;
+  setNumber: number;
+  reps?: number;
+  weight?: number;
+  restTimeSeconds?: number;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface TrainingPlanExercise {
   id: string;
   trainingPlanId: string;
-  trainingGroupId: string;
+  exerciseId: string;
+  trainingGroupId?: string | null;
   orderIndex: number;
-  trainingGroup: TrainingGroup;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  exercise: Exercise;
+  trainingGroup?: TrainingGroup | null;
+  trainingPlanExerciseSets: TrainingPlanExerciseSet[];
+}
+
+export interface CreateTrainingPlanExerciseSet {
+  setNumber: number;
+  reps?: number;
+  weight?: number;
+  restTimeSeconds?: number;
+  notes?: string;
+}
+
+export interface CreateTrainingPlanExercise {
+  exerciseId: string;
+  trainingGroupId?: string | null;
+  orderIndex: number;
+  notes?: string;
+  sets: CreateTrainingPlanExerciseSet[];
 }
 
 export interface CreateTrainingPlanRequest {
@@ -138,7 +171,7 @@ export interface CreateTrainingPlanRequest {
   planDate?: string;
   isTemplate?: boolean;
   isPublic?: boolean;
-  trainingGroupIds?: string[];
+  exercises: CreateTrainingPlanExercise[];
 }
 
 export interface UpdateTrainingPlanRequest extends Partial<CreateTrainingPlanRequest> {
@@ -221,14 +254,14 @@ export interface ExerciseSession {
 export interface ExerciseRecord {
   id: string;
   sessionId: string;
-  trainingGroupId: string;
+  trainingGroupId?: string | null;
   exerciseId: string;
   orderIndex: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
   exercise: Exercise;
-  trainingGroup: TrainingGroup;
+  trainingGroup?: TrainingGroup | null;
   exerciseSetRecords: ExerciseSetRecord[];
 }
 

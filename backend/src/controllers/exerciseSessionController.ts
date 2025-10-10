@@ -131,21 +131,23 @@ export const getExerciseSession = async (req: Request, res: Response): Promise<v
             name: true,
             description: true,
             status: true,
-            trainingPlanGroups: {
+            trainingPlanExercises: {
               include: {
-                trainingGroup: {
-                  include: {
-                    exercise: {
-                      select: {
-                        id: true,
-                        name: true,
-                        nameZh: true
-                      }
-                    },
-                    trainingGroupSets: {
-                      orderBy: { setNumber: 'asc' }
-                    }
+                exercise: {
+                  select: {
+                    id: true,
+                    name: true,
+                    nameZh: true
                   }
+                },
+                trainingGroup: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                },
+                trainingPlanExerciseSets: {
+                  orderBy: { setNumber: 'asc' }
                 }
               },
               orderBy: { orderIndex: 'asc' }

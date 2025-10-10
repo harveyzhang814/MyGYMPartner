@@ -32,27 +32,24 @@ export const getTrainingPlans = async (req: Request, res: Response): Promise<voi
       prisma.trainingPlan.findMany({
         where,
         include: {
-          trainingPlanGroups: {
+          trainingPlanExercises: {
             include: {
-              trainingGroup: {
-                include: {
-                  exercise: {
-                    select: {
-                      id: true,
-                      name: true,
-                      nameZh: true,
-                      muscleGroups: true,
-                      equipment: true,
-                      difficultyLevel: true
-                    }
-                  }
+              exercise: {
+                select: {
+                  id: true,
+                  name: true,
+                  nameZh: true,
+                  muscleGroups: true,
+                  equipment: true,
+                  difficultyLevel: true
                 }
               }
-            }
+            },
+            orderBy: { orderIndex: 'asc' }
           },
           _count: {
             select: {
-              trainingPlanGroups: true
+              trainingPlanExercises: true
             }
           }
         },
@@ -95,24 +92,26 @@ export const getTrainingPlan = async (req: Request, res: Response): Promise<void
         isActive: true
       },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: {
-              include: {
-                exercise: {
-                  select: {
-                    id: true,
-                    name: true,
-                    nameZh: true,
-                    muscleGroups: true,
-                    equipment: true,
-                    difficultyLevel: true
-                  }
-                },
-                trainingGroupSets: {
-                  orderBy: { setNumber: 'asc' }
-                }
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                nameZh: true,
+                muscleGroups: true,
+                equipment: true,
+                difficultyLevel: true
               }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
             }
           },
           orderBy: { orderIndex: 'asc' }
@@ -147,7 +146,7 @@ export const getTrainingPlan = async (req: Request, res: Response): Promise<void
         },
         _count: {
           select: {
-            trainingPlanGroups: true,
+            trainingPlanExercises: true,
             exerciseSessions: true
           }
         }
@@ -181,7 +180,7 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
     const userId = (req as any).user.id;
     const planData: CreateTrainingPlanRequest = req.body;
 
-    // 创建训练计划
+    // 创建训练计划及其动作
     const plan = await prisma.trainingPlan.create({
       data: {
         name: planData.name,
@@ -194,45 +193,69 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
       }
     });
 
-    // 如果有训练组，创建关联
-    if (planData.trainingGroupIds && planData.trainingGroupIds.length > 0) {
-      const trainingPlanGroups = planData.trainingGroupIds.map((groupId, index) => ({
-        trainingPlanId: plan.id,
-        trainingGroupId: groupId,
-        orderIndex: index
-      }));
+    // 创建训练计划动作及其训练组
+    if (planData.exercises && planData.exercises.length > 0) {
+      for (const exerciseData of planData.exercises) {
+        // 创建训练计划动作
+        const planExercise = await prisma.trainingPlanExercise.create({
+          data: {
+            trainingPlanId: plan.id,
+            exerciseId: exerciseData.exerciseId,
+            trainingGroupId: exerciseData.trainingGroupId || null,
+            orderIndex: exerciseData.orderIndex,
+            notes: exerciseData.notes
+          }
+        });
 
-      await prisma.trainingPlanGroup.createMany({
-        data: trainingPlanGroups
-      });
+        // 创建训练组数据
+        if (exerciseData.sets && exerciseData.sets.length > 0) {
+          const sets = exerciseData.sets.map(set => ({
+            trainingPlanExerciseId: planExercise.id,
+            setNumber: set.setNumber,
+            reps: set.reps,
+            weight: set.weight,
+            restTimeSeconds: set.restTimeSeconds,
+            notes: set.notes
+          }));
+
+          await prisma.trainingPlanExerciseSet.createMany({
+            data: sets
+          });
+        }
+      }
     }
 
     // 返回完整的训练计划数据
     const fullPlan = await prisma.trainingPlan.findUnique({
       where: { id: plan.id },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: {
-              include: {
-                exercise: {
-                  select: {
-                    id: true,
-                    name: true,
-                    nameZh: true,
-                    muscleGroups: true,
-                    equipment: true,
-                    difficultyLevel: true
-                  }
-                }
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                nameZh: true,
+                muscleGroups: true,
+                equipment: true,
+                difficultyLevel: true
               }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
             }
           },
           orderBy: { orderIndex: 'asc' }
         },
         _count: {
           select: {
-            trainingPlanGroups: true
+            trainingPlanExercises: true
           }
         }
       }
@@ -277,36 +300,55 @@ export const updateTrainingPlan = async (req: Request, res: Response): Promise<v
     }
 
     // 更新训练计划基本信息
-    const updatedPlan = await prisma.trainingPlan.update({
+    await prisma.trainingPlan.update({
       where: { id },
       data: {
         name: updateData.name,
         description: updateData.description,
         status: updateData.status,
-        planDate: updateData.planDate ? new Date(updateData.planDate) : null,
+        planDate: updateData.planDate ? new Date(updateData.planDate) : undefined,
         isTemplate: updateData.isTemplate,
         isPublic: updateData.isPublic
       }
     });
 
-    // 如果提供了训练组ID列表，更新关联
-    if (updateData.trainingGroupIds !== undefined) {
-      // 删除现有关联
-      await prisma.trainingPlanGroup.deleteMany({
+    // 如果提供了动作列表，更新训练动作
+    if (updateData.exercises !== undefined) {
+      // 删除现有的训练动作（级联删除会自动删除sets）
+      await prisma.trainingPlanExercise.deleteMany({
         where: { trainingPlanId: id }
       });
 
-      // 创建新关联
-      if (updateData.trainingGroupIds.length > 0) {
-        const trainingPlanGroups = updateData.trainingGroupIds.map((groupId, index) => ({
-          trainingPlanId: id,
-          trainingGroupId: groupId,
-          orderIndex: index
-        }));
+      // 创建新的训练动作
+      if (updateData.exercises.length > 0) {
+        for (const exerciseData of updateData.exercises) {
+          // 创建训练计划动作
+          const planExercise = await prisma.trainingPlanExercise.create({
+            data: {
+              trainingPlanId: id,
+              exerciseId: exerciseData.exerciseId,
+              trainingGroupId: exerciseData.trainingGroupId || null,
+              orderIndex: exerciseData.orderIndex,
+              notes: exerciseData.notes
+            }
+          });
 
-        await prisma.trainingPlanGroup.createMany({
-          data: trainingPlanGroups
-        });
+          // 创建训练组数据
+          if (exerciseData.sets && exerciseData.sets.length > 0) {
+            const sets = exerciseData.sets.map(set => ({
+              trainingPlanExerciseId: planExercise.id,
+              setNumber: set.setNumber,
+              reps: set.reps,
+              weight: set.weight,
+              restTimeSeconds: set.restTimeSeconds,
+              notes: set.notes
+            }));
+
+            await prisma.trainingPlanExerciseSet.createMany({
+              data: sets
+            });
+          }
+        }
       }
     }
 
@@ -314,28 +356,33 @@ export const updateTrainingPlan = async (req: Request, res: Response): Promise<v
     const fullPlan = await prisma.trainingPlan.findUnique({
       where: { id },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: {
-              include: {
-                exercise: {
-                  select: {
-                    id: true,
-                    name: true,
-                    nameZh: true,
-                    muscleGroups: true,
-                    equipment: true,
-                    difficultyLevel: true
-                  }
-                }
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                nameZh: true,
+                muscleGroups: true,
+                equipment: true,
+                difficultyLevel: true
               }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
             }
           },
           orderBy: { orderIndex: 'asc' }
         },
         _count: {
           select: {
-            trainingPlanGroups: true
+            trainingPlanExercises: true
           }
         }
       }
@@ -423,9 +470,11 @@ export const duplicateTrainingPlan = async (req: Request, res: Response): Promis
         isActive: true
       },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: true
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
+            }
           },
           orderBy: { orderIndex: 'asc' }
         }
@@ -453,45 +502,69 @@ export const duplicateTrainingPlan = async (req: Request, res: Response): Promis
       }
     });
 
-    // 复制训练组关联
-    if (originalPlan.trainingPlanGroups.length > 0) {
-      const trainingPlanGroups = originalPlan.trainingPlanGroups.map(tpg => ({
-        trainingPlanId: newPlan.id,
-        trainingGroupId: tpg.trainingGroupId,
-        orderIndex: tpg.orderIndex
-      }));
+    // 复制训练动作及其数据
+    if (originalPlan.trainingPlanExercises.length > 0) {
+      for (const originalExercise of originalPlan.trainingPlanExercises) {
+        // 创建训练计划动作
+        const newExercise = await prisma.trainingPlanExercise.create({
+          data: {
+            trainingPlanId: newPlan.id,
+            exerciseId: originalExercise.exerciseId,
+            trainingGroupId: originalExercise.trainingGroupId,
+            orderIndex: originalExercise.orderIndex,
+            notes: originalExercise.notes
+          }
+        });
 
-      await prisma.trainingPlanGroup.createMany({
-        data: trainingPlanGroups
-      });
+        // 复制训练组数据
+        if (originalExercise.trainingPlanExerciseSets.length > 0) {
+          const sets = originalExercise.trainingPlanExerciseSets.map(set => ({
+            trainingPlanExerciseId: newExercise.id,
+            setNumber: set.setNumber,
+            reps: set.reps,
+            weight: set.weight,
+            restTimeSeconds: set.restTimeSeconds,
+            notes: set.notes
+          }));
+
+          await prisma.trainingPlanExerciseSet.createMany({
+            data: sets
+          });
+        }
+      }
     }
 
     // 返回新的训练计划数据
     const fullPlan = await prisma.trainingPlan.findUnique({
       where: { id: newPlan.id },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: {
-              include: {
-                exercise: {
-                  select: {
-                    id: true,
-                    name: true,
-                    nameZh: true,
-                    muscleGroups: true,
-                    equipment: true,
-                    difficultyLevel: true
-                  }
-                }
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                nameZh: true,
+                muscleGroups: true,
+                equipment: true,
+                difficultyLevel: true
               }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
             }
           },
           orderBy: { orderIndex: 'asc' }
         },
         _count: {
           select: {
-            trainingPlanGroups: true
+            trainingPlanExercises: true
           }
         }
       }
@@ -517,7 +590,7 @@ export const startTrainingFromPlan = async (req: Request, res: Response): Promis
     const { id } = req.params;
     const userId = (req as any).user.id;
 
-    // 获取训练计划及其训练组
+    // 获取训练计划及其动作
     const plan = await prisma.trainingPlan.findFirst({
       where: {
         id,
@@ -525,14 +598,10 @@ export const startTrainingFromPlan = async (req: Request, res: Response): Promis
         isActive: true
       },
       include: {
-        trainingPlanGroups: {
+        trainingPlanExercises: {
           include: {
-            trainingGroup: {
-              include: {
-                trainingGroupSets: {
-                  orderBy: { setNumber: 'asc' }
-                }
-              }
+            trainingPlanExerciseSets: {
+              orderBy: { setNumber: 'asc' }
             }
           },
           orderBy: { orderIndex: 'asc' }
@@ -560,25 +629,22 @@ export const startTrainingFromPlan = async (req: Request, res: Response): Promis
       }
     });
 
-    // 复制训练组到训练记录
-    for (let i = 0; i < plan.trainingPlanGroups.length; i++) {
-      const tpg = plan.trainingPlanGroups[i];
-      const trainingGroup = tpg.trainingGroup;
-
+    // 复制训练计划的动作到训练记录
+    for (const planExercise of plan.trainingPlanExercises) {
       // 创建训练记录项
       const exerciseRecord = await prisma.exerciseRecord.create({
         data: {
           sessionId: session.id,
-          trainingGroupId: trainingGroup.id,
-          exerciseId: trainingGroup.exerciseId,
-          orderIndex: i
+          trainingGroupId: planExercise.trainingGroupId || undefined,
+          exerciseId: planExercise.exerciseId,
+          orderIndex: planExercise.orderIndex,
+          notes: planExercise.notes
         }
       });
 
-      // 复制训练组的组数设置
-      if (trainingGroup.trainingGroupSets.length > 0) {
-        // 如果训练组有预设的组数据，复制它们
-        const setRecords = trainingGroup.trainingGroupSets.map(set => ({
+      // 复制训练组数据
+      if (planExercise.trainingPlanExerciseSets.length > 0) {
+        const setRecords = planExercise.trainingPlanExerciseSets.map(set => ({
           exerciseRecordId: exerciseRecord.id,
           setNumber: set.setNumber,
           reps: set.reps,
@@ -587,23 +653,6 @@ export const startTrainingFromPlan = async (req: Request, res: Response): Promis
           isCompleted: false,
           notes: set.notes
         }));
-
-        await prisma.exerciseSetRecord.createMany({
-          data: setRecords
-        });
-      } else {
-        // 如果没有预设数据，根据训练组的范围创建默认组
-        const setRecords = [];
-        for (let j = 1; j <= trainingGroup.sets; j++) {
-          setRecords.push({
-            exerciseRecordId: exerciseRecord.id,
-            setNumber: j,
-            reps: trainingGroup.repsMin || null,
-            weight: trainingGroup.weightMin || null,
-            restTimeSeconds: trainingGroup.restTimeSeconds,
-            isCompleted: false
-          });
-        }
 
         await prisma.exerciseSetRecord.createMany({
           data: setRecords

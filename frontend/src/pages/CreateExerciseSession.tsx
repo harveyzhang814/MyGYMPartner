@@ -514,29 +514,30 @@ const CreateExerciseSession: React.FC = () => {
               <Divider>{t('exerciseSessions.planContent')}</Divider>
               
               <div style={{ fontSize: '12px', color: '#666', fontFamily: 'monospace' }}>
-                {currentExerciseSession.trainingPlan.trainingPlanGroups && 
-                 currentExerciseSession.trainingPlan.trainingPlanGroups.map((tpg) => {
-                   const group = tpg.trainingGroup;
+                {currentExerciseSession.trainingPlan.trainingPlanExercises && 
+                 currentExerciseSession.trainingPlan.trainingPlanExercises.map((planExercise) => {
                    return (
-                     <div key={tpg.id} style={{ marginBottom: 12 }}>
+                     <div key={planExercise.id} style={{ marginBottom: 12 }}>
                        <div style={{ fontWeight: 'bold', color: '#333' }}>
-                         {group.exercise.nameZh || group.exercise.name}
+                         {planExercise.exercise.nameZh || planExercise.exercise.name}
+                         {planExercise.trainingGroup && (
+                           <span style={{ fontSize: '10px', color: '#999', marginLeft: 8 }}>
+                             (来自: {planExercise.trainingGroup.name})
+                           </span>
+                         )}
                        </div>
-                       {group.trainingGroupSets && group.trainingGroupSets.length > 0 ? (
-                         group.trainingGroupSets.map((set) => (
+                       {planExercise.trainingPlanExerciseSets && planExercise.trainingPlanExerciseSets.length > 0 ? (
+                         planExercise.trainingPlanExerciseSets.map((set) => (
                            <div key={set.id} style={{ paddingLeft: 16 }}>
                              {set.weight && set.reps 
                                ? `${set.weight}kg × ${set.reps}次` 
-                               : `${set.reps || '-'}次`}
+                               : set.reps 
+                               ? `${set.reps}次`
+                               : '-'}
                            </div>
                          ))
                        ) : (
-                         <div style={{ paddingLeft: 16 }}>
-                           {group.weightMin && group.weightMax 
-                             ? `${group.weightMin}-${group.weightMax}kg × ${group.repsMin || 0}-${group.repsMax || 0}次` 
-                             : `${group.repsMin || 0}-${group.repsMax || 0}次`}
-                           {` (共${group.sets}组)`}
-                         </div>
+                         <div style={{ paddingLeft: 16 }}>-</div>
                        )}
                      </div>
                    );
