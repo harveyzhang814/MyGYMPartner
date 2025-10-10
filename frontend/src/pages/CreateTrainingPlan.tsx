@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Empty, Row, Col, InputNumber, Divider } from 'antd';
-import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined } from '@ant-design/icons';
+import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Empty, Row, Col, InputNumber, Divider, List, Tag } from 'antd';
+import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -9,13 +9,13 @@ import { fetchTrainingGroups } from '../store/slices/trainingGroupSlice';
 import { fetchExercises } from '../store/slices/exerciseSlice';
 import { useLanguage } from '../contexts/LanguageContext';
 import { CreateTrainingPlanRequest } from '../types';
+import { trainingPlanService } from '../services/trainingPlanService';
 import dayjs from 'dayjs';
 import './CreateTrainingPlan.css';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 interface TrainingSet {
   reps: number;
@@ -34,8 +34,7 @@ interface TrainingPlanForm {
   name: string;
   description?: string;
   status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
-  startDate?: dayjs.Dayjs;
-  endDate?: dayjs.Dayjs;
+  planDate?: dayjs.Dayjs;
   isTemplate: boolean;
   isPublic: boolean;
 }
@@ -86,8 +85,7 @@ const CreateTrainingPlan: React.FC = () => {
         name: currentTrainingPlan.name,
         description: currentTrainingPlan.description,
         status: currentTrainingPlan.status,
-        startDate: currentTrainingPlan.startDate ? dayjs(currentTrainingPlan.startDate) : undefined,
-        endDate: currentTrainingPlan.endDate ? dayjs(currentTrainingPlan.endDate) : undefined,
+        planDate: currentTrainingPlan.planDate ? dayjs(currentTrainingPlan.planDate) : undefined,
         isTemplate: currentTrainingPlan.isTemplate,
         isPublic: currentTrainingPlan.isPublic
       });
@@ -135,8 +133,7 @@ const CreateTrainingPlan: React.FC = () => {
         name: values.name,
         description: values.description,
         status: values.status,
-        startDate: values.startDate?.format('YYYY-MM-DD'),
-        endDate: values.endDate?.format('YYYY-MM-DD'),
+        planDate: values.planDate?.format('YYYY-MM-DD'),
         isTemplate: values.isTemplate,
         isPublic: values.isPublic,
         trainingGroupIds: trainingGroupIds
@@ -255,29 +252,50 @@ const CreateTrainingPlan: React.FC = () => {
     return t('trainingPlans.createDescription');
   };
 
-  // const getSubmitButtonText = () => {
-  //   if (isEditMode) return '更新计划';
-  //   return '创建计划';
-  // };
+  // 开始训练
+  const handleStartTraining = async () => {
+    if (!id) return;
+    
+    try {
+      const session = await trainingPlanService.startTrainingFromPlan(id);
+      message.success(t('trainingPlans.startTrainingSuccess'));
+      // 跳转到训练记录详情页
+      navigate(`/exercise-sessions/${session.id}`);
+    } catch (error: any) {
+      message.error(error.message || t('trainingPlans.startTrainingFailed'));
+    }
+  };
 
   return (
     <div>
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Button 
-            icon={<ArrowLeftOutlined />} 
-            onClick={() => navigate('/training-plans')}
-          >
-            {t('common.back')}
-          </Button>
-          <div>
-            <Title level={2} className="page-title">
-              {getPageTitle()}
-            </Title>
-            <Text className="page-description">
-              {getPageDescription()}
-            </Text>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Button 
+              icon={<ArrowLeftOutlined />} 
+              onClick={() => navigate('/training-plans')}
+            >
+              {t('common.back')}
+            </Button>
+            <div>
+              <Title level={2} className="page-title">
+                {getPageTitle()}
+              </Title>
+              <Text className="page-description">
+                {getPageDescription()}
+              </Text>
+            </div>
           </div>
+          {isDetailMode && (
+            <Button 
+              type="primary" 
+              size="large"
+              icon={<PlayCircleOutlined />}
+              onClick={handleStartTraining}
+            >
+              {t('trainingPlans.startTraining')}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -327,12 +345,12 @@ const CreateTrainingPlan: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                name="dateRange"
-                label="计划时间"
+                name="planDate"
+                label={t('trainingPlans.planDate')}
               >
-                <RangePicker 
+                <DatePicker 
                   style={{ width: '100%' }}
-                  placeholder={[t('trainingPlans.startDate'), t('trainingPlans.endDate')]}
+                  placeholder={t('trainingPlans.selectPlanDate')}
                 />
               </Form.Item>
 
@@ -552,6 +570,70 @@ const CreateTrainingPlan: React.FC = () => {
               )}
             </Form>
           </Card>
+          {isDetailMode && currentTrainingPlan?.exerciseSessions && currentTrainingPlan.exerciseSessions.length > 0 && (
+            <Card 
+              title={t('trainingPlans.relatedSessions')}
+              style={{ marginTop: 24 }}
+              extra={
+                <Text type="secondary">
+                  {t('trainingPlans.sessionCount').replace('{count}', String(currentTrainingPlan.exerciseSessions.length))}
+                </Text>
+              }
+            >
+              <List
+                dataSource={currentTrainingPlan.exerciseSessions}
+                renderItem={(session) => (
+                  <List.Item
+                    key={session.id}
+                    actions={[
+                      <Button 
+                        type="link" 
+                        onClick={() => navigate(`/exercise-sessions/${session.id}`)}
+                      >
+                        {t('common.view')}
+                      </Button>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={
+                        <Space>
+                          <span>{session.name}</span>
+                          <Tag color={
+                            session.status === 'COMPLETED' ? 'success' : 
+                            session.status === 'IN_PROGRESS' ? 'processing' : 
+                            session.status === 'PAUSED' ? 'warning' : 'default'
+                          }>
+                            {t(`exerciseSessions.${session.status.toLowerCase().replace('_', '')}`)}
+                          </Tag>
+                        </Space>
+                      }
+                      description={
+                        <div>
+                          <div>{dayjs(session.sessionDate).format('YYYY-MM-DD')}</div>
+                          {session.exerciseRecords && session.exerciseRecords.length > 0 && (
+                            <div style={{ marginTop: 8 }}>
+                              {session.exerciseRecords.map((record, idx) => (
+                                <div key={record.id} style={{ fontSize: '12px', color: '#666' }}>
+                                  {record.exercise.nameZh || record.exercise.name}
+                                  {record.exerciseSetRecords && record.exerciseSetRecords.length > 0 && (
+                                    <span style={{ marginLeft: 8 }}>
+                                      {record.exerciseSetRecords.map((set) => (
+                                        set.weight && set.reps ? `${set.weight}kg×${set.reps}` : ''
+                                      )).filter(Boolean).join(', ')}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          )}
         </Col>
 
         <Col xs={24} lg={8}>

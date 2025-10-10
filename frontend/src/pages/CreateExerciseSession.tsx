@@ -488,6 +488,62 @@ const CreateExerciseSession: React.FC = () => {
               )}
             </Form>
           </Card>
+          
+          {isDetailMode && currentExerciseSession?.trainingPlan && (
+            <Card 
+              title={t('exerciseSessions.relatedPlan')}
+              style={{ marginTop: 24 }}
+              extra={
+                <Button 
+                  type="link" 
+                  onClick={() => navigate(`/training-plans/${currentExerciseSession.trainingPlan!.id}`)}
+                >
+                  {t('common.view')}
+                </Button>
+              }
+            >
+              <div style={{ marginBottom: 16 }}>
+                <Text strong style={{ fontSize: '16px' }}>{currentExerciseSession.trainingPlan.name}</Text>
+                {currentExerciseSession.trainingPlan.description && (
+                  <div style={{ marginTop: 8, color: '#666' }}>
+                    {currentExerciseSession.trainingPlan.description}
+                  </div>
+                )}
+              </div>
+              
+              <Divider>{t('exerciseSessions.planContent')}</Divider>
+              
+              <div style={{ fontSize: '12px', color: '#666', fontFamily: 'monospace' }}>
+                {currentExerciseSession.trainingPlan.trainingPlanGroups && 
+                 currentExerciseSession.trainingPlan.trainingPlanGroups.map((tpg, idx) => {
+                   const group = tpg.trainingGroup;
+                   return (
+                     <div key={tpg.id} style={{ marginBottom: 12 }}>
+                       <div style={{ fontWeight: 'bold', color: '#333' }}>
+                         {group.exercise.nameZh || group.exercise.name}
+                       </div>
+                       {group.trainingGroupSets && group.trainingGroupSets.length > 0 ? (
+                         group.trainingGroupSets.map((set) => (
+                           <div key={set.id} style={{ paddingLeft: 16 }}>
+                             {set.weight && set.reps 
+                               ? `${set.weight}kg × ${set.reps}次` 
+                               : `${set.reps || '-'}次`}
+                           </div>
+                         ))
+                       ) : (
+                         <div style={{ paddingLeft: 16 }}>
+                           {group.weightMin && group.weightMax 
+                             ? `${group.weightMin}-${group.weightMax}kg × ${group.repsMin || 0}-${group.repsMax || 0}次` 
+                             : `${group.repsMin || 0}-${group.repsMax || 0}次`}
+                           {` (共${group.sets}组)`}
+                         </div>
+                       )}
+                     </div>
+                   );
+                 })}
+              </div>
+            </Card>
+          )}
         </Col>
 
         <Col xs={24} lg={8}>

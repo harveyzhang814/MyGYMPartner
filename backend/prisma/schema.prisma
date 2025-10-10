@@ -179,8 +179,7 @@ model TrainingPlan {
   name               String
   description        String?
   status             PlanStatus          @default(DRAFT)
-  startDate          DateTime?           @map("start_date") @db.Date
-  endDate            DateTime?           @map("end_date") @db.Date
+  planDate           DateTime?           @map("plan_date") @db.Date
   isTemplate         Boolean             @default(false) @map("is_template")
   isPublic           Boolean             @default(false) @map("is_public")
   isActive           Boolean             @default(true) @map("is_active")

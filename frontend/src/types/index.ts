@@ -109,16 +109,17 @@ export interface TrainingPlan {
   name: string;
   description?: string;
   status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
-  startDate?: string;
-  endDate?: string;
+  planDate?: string;
   isTemplate: boolean;
   isPublic: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   trainingPlanGroups: TrainingPlanGroup[];
+  exerciseSessions?: ExerciseSession[];
   _count: {
     trainingPlanGroups: number;
+    exerciseSessions?: number;
   };
 }
 
@@ -134,8 +135,7 @@ export interface CreateTrainingPlanRequest {
   name: string;
   description?: string;
   status?: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'CANCELLED';
-  startDate?: string;
-  endDate?: string;
+  planDate?: string;
   isTemplate?: boolean;
   isPublic?: boolean;
   trainingGroupIds?: string[];
@@ -148,8 +148,7 @@ export interface UpdateTrainingPlanRequest extends Partial<CreateTrainingPlanReq
 export interface TrainingPlanSearchParams extends PaginationParams {
   search?: string;
   status?: string;
-  startDate?: string;
-  endDate?: string;
+  planDate?: string;
   isTemplate?: boolean;
   isPublic?: boolean;
 }
@@ -173,6 +172,18 @@ export interface TrainingGroup {
   createdAt: string;
   updatedAt: string;
   exercise: Exercise;
+  trainingGroupSets?: TrainingGroupSet[];
+}
+
+export interface TrainingGroupSet {
+  id: string;
+  trainingGroupId: string;
+  setNumber: number;
+  reps?: number;
+  weight?: number;
+  restTimeSeconds?: number;
+  notes?: string;
+  createdAt: string;
 }
 
 export interface CreateTrainingGroupRequest {
@@ -194,6 +205,7 @@ export interface ExerciseSession {
   id: string;
   userId: string;
   trainingPlanId?: string;
+  trainingPlan?: TrainingPlan;
   name: string;
   sessionDate: string;
   startTime?: string;

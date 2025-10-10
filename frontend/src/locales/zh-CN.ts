@@ -226,6 +226,9 @@ export const zhCN = {
     detailDescription: '查看训练计划详细信息',
     createTrainingPlan: '创建训练计划',
     duplicateTrainingPlan: '复制训练计划',
+    startTraining: '开始训练',
+    startTrainingSuccess: '训练已开始！',
+    startTrainingFailed: '开始训练失败，请重试',
     deleteSuccess: '训练计划删除成功！',
     deleteConfirm: '确定要删除这个训练计划吗？',
     deleteDescription: '删除后无法恢复，请谨慎操作',
@@ -234,8 +237,8 @@ export const zhCN = {
               planName: '计划名称',
               planDescription: '计划描述',
               planStatus: '计划状态',
-              startDate: '开始日期',
-              endDate: '结束日期',
+              planDate: '计划日期',
+              selectPlanDate: '选择计划日期',
               isTemplate: '模板计划',
               isPublic: '公开计划',
               planNamePlaceholder: '例如：增肌训练计划',
@@ -273,11 +276,14 @@ export const zhCN = {
     statusCompleted: '已完成',
     statusPaused: '已暂停',
     statusCancelled: '已取消',
+    relatedSessions: '关联的训练记录',
+    noRelatedSessions: '暂无关联的训练记录',
+    sessionCount: '共 {count} 次训练',
     tipsTitle: '创建提示',
     tipsPlanInfo: '计划信息：',
     tip1: '计划名称是必填项',
     tip2: '建议填写详细的计划描述',
-    tip3: '可以设置计划的开始和结束日期',
+    tip3: '可以设置计划的日期',
     tip4: '模板计划可供快速创建',
     tip5: '公开计划其他用户可见',
     tip6: '可以随时添加或移除训练组'
@@ -384,7 +390,10 @@ export const zhCN = {
     completed: '已完成',
     inProgress: '进行中',
     paused: '已暂停',
-    cancelled: '已取消'
+    cancelled: '已取消',
+    relatedPlan: '关联的训练计划',
+    noRelatedPlan: '未关联训练计划',
+    planContent: '计划内容'
   },
 
   // 仪表板页面

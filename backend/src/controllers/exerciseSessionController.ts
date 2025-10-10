@@ -125,6 +125,33 @@ export const getExerciseSession = async (req: Request, res: Response): Promise<v
         userId
       },
       include: {
+        trainingPlan: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            status: true,
+            trainingPlanGroups: {
+              include: {
+                trainingGroup: {
+                  include: {
+                    exercise: {
+                      select: {
+                        id: true,
+                        name: true,
+                        nameZh: true
+                      }
+                    },
+                    trainingGroupSets: {
+                      orderBy: { setNumber: 'asc' }
+                    }
+                  }
+                }
+              },
+              orderBy: { orderIndex: 'asc' }
+            }
+          }
+        },
         exerciseRecords: {
           include: {
             exercise: {

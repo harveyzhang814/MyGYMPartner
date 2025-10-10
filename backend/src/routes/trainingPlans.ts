@@ -6,7 +6,8 @@ import {
   createTrainingPlan,
   updateTrainingPlan,
   deleteTrainingPlan,
-  duplicateTrainingPlan
+  duplicateTrainingPlan,
+  startTrainingFromPlan
 } from '../controllers/trainingPlanController';
 
 const router = Router();
@@ -21,5 +22,6 @@ router.post('/', createTrainingPlan);
 router.put('/:id', updateTrainingPlan);
 router.delete('/:id', deleteTrainingPlan);
 router.post('/:id/duplicate', duplicateTrainingPlan);
+router.post('/:id/start-training', startTrainingFromPlan);
 
 export default router;

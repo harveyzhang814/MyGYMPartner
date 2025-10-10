@@ -108,15 +108,47 @@ export const getTrainingPlan = async (req: Request, res: Response): Promise<void
                     equipment: true,
                     difficultyLevel: true
                   }
+                },
+                trainingGroupSets: {
+                  orderBy: { setNumber: 'asc' }
                 }
               }
             }
           },
           orderBy: { orderIndex: 'asc' }
         },
+        exerciseSessions: {
+          select: {
+            id: true,
+            name: true,
+            sessionDate: true,
+            startTime: true,
+            endTime: true,
+            totalDurationMinutes: true,
+            status: true,
+            exerciseRecords: {
+              include: {
+                exercise: {
+                  select: {
+                    id: true,
+                    name: true,
+                    nameZh: true
+                  }
+                },
+                exerciseSetRecords: {
+                  orderBy: { setNumber: 'asc' }
+                }
+              },
+              orderBy: { orderIndex: 'asc' }
+            }
+          },
+          orderBy: { sessionDate: 'desc' },
+          take: 10
+        },
         _count: {
           select: {
-            trainingPlanGroups: true
+            trainingPlanGroups: true,
+            exerciseSessions: true
           }
         }
       }
@@ -155,8 +187,7 @@ export const createTrainingPlan = async (req: Request, res: Response): Promise<v
         name: planData.name,
         description: planData.description,
         status: planData.status || 'DRAFT',
-        startDate: planData.startDate ? new Date(planData.startDate) : null,
-        endDate: planData.endDate ? new Date(planData.endDate) : null,
+        planDate: planData.planDate ? new Date(planData.planDate) : null,
         isTemplate: planData.isTemplate || false,
         isPublic: planData.isPublic || false,
         userId
@@ -252,8 +283,7 @@ export const updateTrainingPlan = async (req: Request, res: Response): Promise<v
         name: updateData.name,
         description: updateData.description,
         status: updateData.status,
-        startDate: updateData.startDate ? new Date(updateData.startDate) : null,
-        endDate: updateData.endDate ? new Date(updateData.endDate) : null,
+        planDate: updateData.planDate ? new Date(updateData.planDate) : null,
         isTemplate: updateData.isTemplate,
         isPublic: updateData.isPublic
       }
@@ -416,8 +446,7 @@ export const duplicateTrainingPlan = async (req: Request, res: Response): Promis
         name: `${originalPlan.name} (副本)`,
         description: originalPlan.description,
         status: 'DRAFT',
-        startDate: null,
-        endDate: null,
+        planDate: null,
         isTemplate: false,
         isPublic: false,
         userId
@@ -478,6 +507,155 @@ export const duplicateTrainingPlan = async (req: Request, res: Response): Promis
     res.status(500).json({
       success: false,
       error: 'Failed to duplicate training plan'
+    });
+  }
+};
+
+// 从训练计划开始训练
+export const startTrainingFromPlan = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+
+    // 获取训练计划及其训练组
+    const plan = await prisma.trainingPlan.findFirst({
+      where: {
+        id,
+        userId,
+        isActive: true
+      },
+      include: {
+        trainingPlanGroups: {
+          include: {
+            trainingGroup: {
+              include: {
+                trainingGroupSets: {
+                  orderBy: { setNumber: 'asc' }
+                }
+              }
+            }
+          },
+          orderBy: { orderIndex: 'asc' }
+        }
+      }
+    });
+
+    if (!plan) {
+      res.status(404).json({
+        success: false,
+        error: 'Training plan not found'
+      });
+      return;
+    }
+
+    // 创建训练记录
+    const session = await prisma.exerciseSession.create({
+      data: {
+        name: plan.name,
+        sessionDate: new Date(),
+        startTime: new Date(),
+        status: 'IN_PROGRESS',
+        userId,
+        trainingPlanId: plan.id
+      }
+    });
+
+    // 复制训练组到训练记录
+    for (let i = 0; i < plan.trainingPlanGroups.length; i++) {
+      const tpg = plan.trainingPlanGroups[i];
+      const trainingGroup = tpg.trainingGroup;
+
+      // 创建训练记录项
+      const exerciseRecord = await prisma.exerciseRecord.create({
+        data: {
+          sessionId: session.id,
+          trainingGroupId: trainingGroup.id,
+          exerciseId: trainingGroup.exerciseId,
+          orderIndex: i
+        }
+      });
+
+      // 复制训练组的组数设置
+      if (trainingGroup.trainingGroupSets.length > 0) {
+        // 如果训练组有预设的组数据，复制它们
+        const setRecords = trainingGroup.trainingGroupSets.map(set => ({
+          exerciseRecordId: exerciseRecord.id,
+          setNumber: set.setNumber,
+          reps: set.reps,
+          weight: set.weight,
+          restTimeSeconds: set.restTimeSeconds,
+          isCompleted: false,
+          notes: set.notes
+        }));
+
+        await prisma.exerciseSetRecord.createMany({
+          data: setRecords
+        });
+      } else {
+        // 如果没有预设数据，根据训练组的范围创建默认组
+        const setRecords = [];
+        for (let j = 1; j <= trainingGroup.sets; j++) {
+          setRecords.push({
+            exerciseRecordId: exerciseRecord.id,
+            setNumber: j,
+            reps: trainingGroup.repsMin || null,
+            weight: trainingGroup.weightMin || null,
+            restTimeSeconds: trainingGroup.restTimeSeconds,
+            isCompleted: false
+          });
+        }
+
+        await prisma.exerciseSetRecord.createMany({
+          data: setRecords
+        });
+      }
+    }
+
+    // 返回完整的训练记录数据
+    const fullSession = await prisma.exerciseSession.findUnique({
+      where: { id: session.id },
+      include: {
+        exerciseRecords: {
+          include: {
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                nameZh: true,
+                muscleGroups: true,
+                equipment: true
+              }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true,
+                sets: true,
+                repsMin: true,
+                repsMax: true,
+                weightMin: true,
+                weightMax: true
+              }
+            },
+            exerciseSetRecords: {
+              orderBy: { setNumber: 'asc' }
+            }
+          },
+          orderBy: { orderIndex: 'asc' }
+        }
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      data: fullSession,
+      message: 'Training session started successfully'
+    });
+  } catch (error) {
+    console.error('Start training from plan error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to start training from plan'
     });
   }
 };

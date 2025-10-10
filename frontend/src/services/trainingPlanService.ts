@@ -1,5 +1,5 @@
 import api from './api';
-import { TrainingPlan, PaginatedResponse, CreateTrainingPlanRequest, TrainingPlanSearchParams } from '../types';
+import { TrainingPlan, PaginatedResponse, CreateTrainingPlanRequest, TrainingPlanSearchParams, ExerciseSession } from '../types';
 
 export const trainingPlanService = {
   // Get training plans
@@ -37,6 +37,12 @@ export const trainingPlanService = {
   // Duplicate training plan
   duplicateTrainingPlan: async (id: string): Promise<TrainingPlan> => {
     const response = await api.post<{ success: boolean; data: TrainingPlan }>(`/training-plans/${id}/duplicate`);
+    return response.data.data;
+  },
+
+  // Start training from plan
+  startTrainingFromPlan: async (id: string): Promise<ExerciseSession> => {
+    const response = await api.post<{ success: boolean; data: ExerciseSession }>(`/training-plans/${id}/start-training`);
     return response.data.data;
   }
 };
