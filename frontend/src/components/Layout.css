@@ -1,0 +1,121 @@
+/* Layout 组件样式 - 优雅运动风 */
+
+.layout-container {
+  min-height: 100vh;
+}
+
+/* Sidebar 样式 */
+.layout-sider {
+  background: #FFFFFF;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.layout-logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #E9ECEF;
+  position: relative;
+}
+
+.layout-logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4A90E2, #17A2B8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.layout-logo-text-collapsed {
+  font-size: 16px;
+}
+
+.layout-menu {
+  border: none;
+}
+
+/* 选中菜单项样式 */
+.layout-menu .ant-menu-item-selected {
+  background: rgba(74, 144, 226, 0.1) !important;
+  border-right: 3px solid #4A90E2;
+}
+
+.layout-menu .ant-menu-item-selected::after {
+  display: none;
+}
+
+.layout-menu .ant-menu-item {
+  transition: all 0.3s ease;
+}
+
+.layout-menu .ant-menu-item:hover {
+  background: rgba(74, 144, 226, 0.05);
+}
+
+/* Header 样式 */
+.layout-header {
+  background: #FFFFFF;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.layout-header-trigger {
+  font-size: 16px;
+  width: 64px;
+  height: 64px;
+  transition: all 0.3s ease;
+}
+
+.layout-header-trigger:hover {
+  color: #4A90E2;
+  background: rgba(74, 144, 226, 0.05);
+}
+
+.layout-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.layout-header-welcome {
+  color: #262626;
+  font-weight: 500;
+}
+
+/* Content 样式 */
+.layout-content {
+  margin: 24px 16px;
+  padding: 24px;
+  background: transparent;
+  min-height: calc(100vh - 112px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .layout-header {
+    padding: 0 16px;
+  }
+  
+  .layout-content {
+    margin: 16px 8px;
+    padding: 16px;
+  }
+  
+  .layout-header-welcome {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .layout-header-right {
+    gap: 8px;
+  }
+}
+
