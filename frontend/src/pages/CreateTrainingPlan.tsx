@@ -52,12 +52,7 @@ const CreateTrainingPlan: React.FC = () => {
   
   const [form] = Form.useForm<TrainingPlanForm>();
   const [selectedTrainingGroups, setSelectedTrainingGroups] = useState<string[]>([]);
-  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([
-    {
-      exerciseId: '',
-      sets: [{ reps: 10, weight: 0, restTime: 60, notes: '' }]
-    }
-  ]);
+  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
   const [isDetailMode, setIsDetailMode] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -386,65 +381,33 @@ const CreateTrainingPlan: React.FC = () => {
               </Form.Item>
 
               <div style={{ marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div style={{ marginBottom: 16 }}>
                   <Text strong>{t('trainingPlans.trainingExercises')}</Text>
-                  {!isDetailMode && (
-                    <Button 
-                      type="dashed" 
-                      icon={<PlusOutlined />} 
-                      onClick={handleAddExercise}
-                    >
-                      {t('trainingPlans.addExerciseManually')}
-                    </Button>
-                  )}
                 </div>
 
-                {!isDetailMode && (
-                  <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <Text strong>{t('trainingPlans.importFromTrainingGroups')}</Text>
-                    </div>
-                    <Select
-                      mode="multiple"
-                      placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
-                      value={selectedTrainingGroups}
-                      onChange={setSelectedTrainingGroups}
-                      style={{ width: '100%', marginBottom: 12 }}
-                      loading={trainingGroupsLoading}
-                    >
-                      {trainingGroups.map((group) => (
-                        <Option key={group.id} value={group.id}>
-                          {group.name} - {group.exercise.nameZh || group.exercise.name}
-                        </Option>
-                      ))}
-                    </Select>
-                    <Button 
-                      type="primary" 
-                      icon={<ImportOutlined />}
-                      onClick={handleImportFromTrainingGroups}
-                      disabled={selectedTrainingGroups.length === 0}
-                    >
-                      {t('trainingPlans.addTrainingGroups')}
-                    </Button>
-                  </Card>
-                )}
-
-                <Divider />
-
-                {exerciseRecords.map((record, exerciseIndex) => (
+                {exerciseRecords.length === 0 && !isDetailMode ? (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="暂无训练动作，请通过下方添加"
+                    style={{ margin: '40px 0' }}
+                  />
+                ) : (
+                  exerciseRecords.map((record, exerciseIndex) => (
                   <Card 
                     key={exerciseIndex} 
                     size="small" 
                     style={{ marginBottom: 16 }}
                     title={`${t('trainingPlans.exerciseNumber').replace('{number}', String(exerciseIndex + 1))}`}
                     extra={
-                      !isDetailMode && exerciseRecords.length > 1 && (
+                      !isDetailMode && (
                         <Button 
                           type="text" 
                           danger 
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemoveExercise(exerciseIndex)}
-                        />
+                        >
+                          删除动作
+                        </Button>
                       )
                     }
                   >
@@ -621,14 +584,50 @@ const CreateTrainingPlan: React.FC = () => {
                       ))}
                     </div>
                   </Card>
-                ))}
+                ))
+                )}
 
-                {exerciseRecords.length === 0 && (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('trainingPlans.noExercises')}
-                    style={{ margin: '20px 0' }}
-                  />
+                <Divider />
+
+                {!isDetailMode && (
+                  <>
+                    <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
+                      <div style={{ marginBottom: 12 }}>
+                        <Text strong>{t('trainingPlans.importFromTrainingGroups')}</Text>
+                      </div>
+                      <Select
+                        mode="multiple"
+                        placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
+                        value={selectedTrainingGroups}
+                        onChange={setSelectedTrainingGroups}
+                        style={{ width: '100%', marginBottom: 12 }}
+                        loading={trainingGroupsLoading}
+                      >
+                        {trainingGroups.map((group) => (
+                          <Option key={group.id} value={group.id}>
+                            {group.name} - {group.exercise.nameZh || group.exercise.name}
+                          </Option>
+                        ))}
+                      </Select>
+                      <Button 
+                        type="primary" 
+                        icon={<ImportOutlined />}
+                        onClick={handleImportFromTrainingGroups}
+                        disabled={selectedTrainingGroups.length === 0}
+                      >
+                        {t('trainingPlans.addTrainingGroups')}
+                      </Button>
+                    </Card>
+
+                    <Button 
+                      type="dashed" 
+                      icon={<PlusOutlined />} 
+                      onClick={handleAddExercise}
+                      block
+                    >
+                      {t('trainingPlans.addExerciseManually')}
+                    </Button>
+                  </>
                 )}
               </div>
 
