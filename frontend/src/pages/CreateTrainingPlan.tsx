@@ -434,23 +434,37 @@ const CreateTrainingPlan: React.FC = () => {
                     <Row gutter={16} style={{ marginBottom: 16 }}>
                       <Col span={24}>
                         <Text>{t('trainingPlans.selectExercise')}</Text>
-                        <Select
-                          placeholder={t('trainingPlans.selectExercisePlaceholder')}
-                          value={record.exerciseId}
-                          onChange={(value) => handleExerciseChange(exerciseIndex, 'exerciseId', value)}
-                          style={{ width: '100%', marginTop: 4 }}
-                          loading={exercisesLoading}
-                          showSearch
-                          filterOption={(input, option) =>
-                            String(option?.children || '').toLowerCase().includes(input.toLowerCase())
-                          }
-                        >
-                          {exercises.map((exercise) => (
-                            <Option key={exercise.id} value={exercise.id}>
-                              {exercise.nameZh || exercise.name}
-                            </Option>
-                          ))}
-                        </Select>
+                        {isDetailMode ? (
+                          <div style={{ 
+                            padding: '8px 12px', 
+                            marginTop: 4,
+                            backgroundColor: '#f5f5f5', 
+                            borderRadius: '6px',
+                            border: '1px solid #d9d9d9'
+                          }}>
+                            {exercises.find(e => e.id === record.exerciseId)?.nameZh || 
+                             exercises.find(e => e.id === record.exerciseId)?.name || 
+                             '未选择动作'}
+                          </div>
+                        ) : (
+                          <Select
+                            placeholder={t('trainingPlans.selectExercisePlaceholder')}
+                            value={record.exerciseId}
+                            onChange={(value) => handleExerciseChange(exerciseIndex, 'exerciseId', value)}
+                            style={{ width: '100%', marginTop: 4 }}
+                            loading={exercisesLoading}
+                            showSearch
+                            filterOption={(input, option) =>
+                              String(option?.children || '').toLowerCase().includes(input.toLowerCase())
+                            }
+                          >
+                            {exercises.map((exercise) => (
+                              <Option key={exercise.id} value={exercise.id}>
+                                {exercise.nameZh || exercise.name}
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
                       </Col>
                     </Row>
 
@@ -490,47 +504,92 @@ const CreateTrainingPlan: React.FC = () => {
                           <Row gutter={16}>
                             <Col span={6}>
                               <Text>{t('trainingPlans.reps')}</Text>
-                              <InputNumber
-                                min={1}
-                                max={100}
-                                value={set.reps}
-                                onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'reps', value || 0)}
-                                style={{ width: '100%', marginTop: 4 }}
-                                disabled={isDetailMode}
-                              />
+                              {isDetailMode ? (
+                                <div style={{ 
+                                  padding: '8px 12px', 
+                                  marginTop: 4,
+                                  backgroundColor: '#f5f5f5', 
+                                  borderRadius: '6px',
+                                  border: '1px solid #d9d9d9'
+                                }}>
+                                  {set.reps}
+                                </div>
+                              ) : (
+                                <InputNumber
+                                  min={1}
+                                  max={100}
+                                  value={set.reps}
+                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'reps', value || 0)}
+                                  style={{ width: '100%', marginTop: 4 }}
+                                />
+                              )}
                             </Col>
                             <Col span={6}>
                               <Text>{t('trainingPlans.weight')} (kg)</Text>
-                              <InputNumber
-                                min={0}
-                                max={1000}
-                                step={0.5}
-                                value={set.weight}
-                                onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'weight', value || 0)}
-                                style={{ width: '100%', marginTop: 4 }}
-                                disabled={isDetailMode}
-                              />
+                              {isDetailMode ? (
+                                <div style={{ 
+                                  padding: '8px 12px', 
+                                  marginTop: 4,
+                                  backgroundColor: '#f5f5f5', 
+                                  borderRadius: '6px',
+                                  border: '1px solid #d9d9d9'
+                                }}>
+                                  {set.weight}
+                                </div>
+                              ) : (
+                                <InputNumber
+                                  min={0}
+                                  max={1000}
+                                  step={0.5}
+                                  value={set.weight}
+                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'weight', value || 0)}
+                                  style={{ width: '100%', marginTop: 4 }}
+                                />
+                              )}
                             </Col>
                             <Col span={6}>
                               <Text>{t('trainingPlans.restTime')} (秒)</Text>
-                              <InputNumber
-                                min={0}
-                                max={600}
-                                value={set.restTime}
-                                onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'restTime', value || 60)}
-                                style={{ width: '100%', marginTop: 4 }}
-                                disabled={isDetailMode}
-                              />
+                              {isDetailMode ? (
+                                <div style={{ 
+                                  padding: '8px 12px', 
+                                  marginTop: 4,
+                                  backgroundColor: '#f5f5f5', 
+                                  borderRadius: '6px',
+                                  border: '1px solid #d9d9d9'
+                                }}>
+                                  {set.restTime}
+                                </div>
+                              ) : (
+                                <InputNumber
+                                  min={0}
+                                  max={600}
+                                  value={set.restTime}
+                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'restTime', value || 60)}
+                                  style={{ width: '100%', marginTop: 4 }}
+                                />
+                              )}
                             </Col>
                             <Col span={6}>
                               <Text>{t('trainingPlans.notes')}</Text>
-                              <Input
-                                placeholder={t('trainingPlans.notesPlaceholder')}
-                                value={set.notes}
-                                onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
-                                style={{ width: '100%', marginTop: 4 }}
-                                disabled={isDetailMode}
-                              />
+                              {isDetailMode ? (
+                                <div style={{ 
+                                  padding: '8px 12px', 
+                                  marginTop: 4,
+                                  backgroundColor: '#f5f5f5', 
+                                  borderRadius: '6px',
+                                  border: '1px solid #d9d9d9',
+                                  minHeight: '32px'
+                                }}>
+                                  {set.notes || '-'}
+                                </div>
+                              ) : (
+                                <Input
+                                  placeholder={t('trainingPlans.notesPlaceholder')}
+                                  value={set.notes}
+                                  onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
+                                  style={{ width: '100%', marginTop: 4 }}
+                                />
+                              )}
                             </Col>
                           </Row>
                         </Card>
