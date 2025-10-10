@@ -358,7 +358,10 @@ export const updateExerciseSession = async (req: Request, res: Response): Promis
   try {
     const userId = (req as any).user.id;
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData: CreateExerciseSessionRequest = req.body;
+
+    console.log('Updating exercise session:', id);
+    console.log('Update data:', JSON.stringify(updateData, null, 2));
 
     // Check if session exists and belongs to user
     const existingSession = await prisma.exerciseSession.findFirst({
@@ -373,12 +376,64 @@ export const updateExerciseSession = async (req: Request, res: Response): Promis
         success: false,
         error: 'Exercise session not found'
       });
+      return;
     }
 
-    // Update session
-    const session = await prisma.exerciseSession.update({
+    // Update basic session info
+    await prisma.exerciseSession.update({
       where: { id },
-      data: updateData,
+      data: {
+        name: updateData.name,
+        sessionDate: updateData.sessionDate ? new Date(updateData.sessionDate) : undefined,
+        startTime: updateData.startTime,
+        notes: updateData.notes
+      }
+    });
+
+    // Update exercise records if provided
+    if (updateData.exercises !== undefined) {
+      // Delete existing exercise records (cascade will delete sets)
+      await prisma.exerciseRecord.deleteMany({
+        where: { sessionId: id }
+      });
+
+      // Create new exercise records
+      if (updateData.exercises.length > 0) {
+        for (const exerciseData of updateData.exercises) {
+          // Create exercise record
+          const exerciseRecord = await prisma.exerciseRecord.create({
+            data: {
+              sessionId: id,
+              exerciseId: exerciseData.exerciseId,
+              trainingGroupId: exerciseData.trainingGroupId || null,
+              orderIndex: exerciseData.orderIndex,
+              notes: exerciseData.notes || null
+            }
+          });
+
+          // Create sets
+          if (exerciseData.sets && exerciseData.sets.length > 0) {
+            const sets = exerciseData.sets.map(set => ({
+              exerciseRecordId: exerciseRecord.id,
+              setNumber: set.setNumber,
+              reps: set.reps || null,
+              weight: set.weight || null,
+              restTimeSeconds: set.restTimeSeconds || null,
+              isCompleted: set.isCompleted || false,
+              notes: set.notes || null
+            }));
+
+            await prisma.exerciseSetRecord.createMany({
+              data: sets
+            });
+          }
+        }
+      }
+    }
+
+    // Return complete updated session
+    const fullSession = await prisma.exerciseSession.findUnique({
+      where: { id },
       include: {
         exerciseRecords: {
           include: {
@@ -389,6 +444,17 @@ export const updateExerciseSession = async (req: Request, res: Response): Promis
                 nameZh: true,
                 muscleGroups: true,
                 equipment: true
+              }
+            },
+            trainingGroup: {
+              select: {
+                id: true,
+                name: true,
+                sets: true,
+                repsMin: true,
+                repsMax: true,
+                weightMin: true,
+                weightMax: true
               }
             },
             exerciseSetRecords: {
@@ -402,14 +468,15 @@ export const updateExerciseSession = async (req: Request, res: Response): Promis
 
     res.json({
       success: true,
-      data: session,
+      data: fullSession,
       message: 'Exercise session updated successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update exercise session error:', error);
+    console.error('Error message:', error.message);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: error.message || 'Internal server error'
     });
   }
 };

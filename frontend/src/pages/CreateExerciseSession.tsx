@@ -4,7 +4,7 @@ import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, PlayCircleOutlined, Im
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
-import { createExerciseSession, fetchExerciseSession } from '../store/slices/exerciseSessionSlice';
+import { createExerciseSession, updateExerciseSession, fetchExerciseSession } from '../store/slices/exerciseSessionSlice';
 import { fetchTrainingGroups } from '../store/slices/trainingGroupSlice';
 import { fetchExercises } from '../store/slices/exerciseSlice';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -213,8 +213,14 @@ const CreateExerciseSession: React.FC = () => {
         exercises: exercises
       };
 
-      await dispatch(createExerciseSession(sessionData)).unwrap();
-      message.success(t('exerciseSessions.createSuccess'));
+      if (isEditMode && id) {
+        await dispatch(updateExerciseSession({ id, data: sessionData })).unwrap();
+        message.success('训练记录更新成功！');
+      } else {
+        await dispatch(createExerciseSession(sessionData)).unwrap();
+        message.success(t('exerciseSessions.createSuccess'));
+      }
+      
       navigate('/exercise-sessions');
     } catch (error: any) {
       message.error(error.message || t('exerciseSessions.createFailed'));
