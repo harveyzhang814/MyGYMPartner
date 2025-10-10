@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, Select, InputNumber, Space, message, Row, Col, DatePicker, TimePicker, Divider, Empty } from 'antd';
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, PlayCircleOutlined, ImportOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, PlayCircleOutlined, ImportOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -74,7 +74,7 @@ const CreateExerciseSession: React.FC = () => {
       if (currentExerciseSession.exerciseRecords && currentExerciseSession.exerciseRecords.length > 0) {
         const records: ExerciseRecord[] = currentExerciseSession.exerciseRecords.map(record => ({
           exerciseId: record.exerciseId,
-          trainingGroupId: record.trainingGroupId,
+          trainingGroupId: record.trainingGroupId || undefined,
           sets: record.exerciseSetRecords.map(setRecord => ({
             reps: setRecord.reps || 0,
             weight: setRecord.weight || 0,
@@ -225,21 +225,32 @@ const CreateExerciseSession: React.FC = () => {
   return (
     <div>
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Button 
-            icon={<ArrowLeftOutlined />} 
-            onClick={() => navigate('/exercise-sessions')}
-          >
-            {t('common.back')}
-          </Button>
-          <div>
-            <Title level={2} className="page-title">
-              {isDetailMode ? t('exerciseSessions.detailTitle') : isEditMode ? t('exerciseSessions.continueTraining') : t('exerciseSessions.recordTraining')}
-            </Title>
-            <Text className="page-description">
-              {isDetailMode ? t('exerciseSessions.detailDescription') : isEditMode ? t('exerciseSessions.continueDescription') : t('exerciseSessions.recordDescription')}
-            </Text>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Button 
+              icon={<ArrowLeftOutlined />} 
+              onClick={() => navigate('/exercise-sessions')}
+            >
+              {t('common.back')}
+            </Button>
+            <div>
+              <Title level={2} className="page-title">
+                {isDetailMode ? t('exerciseSessions.detailTitle') : isEditMode ? t('exerciseSessions.continueTraining') : t('exerciseSessions.recordTraining')}
+              </Title>
+              <Text className="page-description">
+                {isDetailMode ? t('exerciseSessions.detailDescription') : isEditMode ? t('exerciseSessions.continueDescription') : t('exerciseSessions.recordDescription')}
+              </Text>
+            </div>
           </div>
+          {isDetailMode && id && (
+            <Button 
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/exercise-sessions/${id}/edit`)}
+              size="large"
+            >
+              {t('common.edit')}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -569,19 +580,21 @@ const CreateExerciseSession: React.FC = () => {
           )}
         </Col>
 
-        <Col xs={24} lg={8}>
-          <Card title={t('exerciseSessions.tipsTitle')}>
-            <div style={{ color: '#666' }}>
-              <p><strong>{t('exerciseSessions.tipsTitle')}</strong></p>
-              <p>• {t('exerciseSessions.tip1')}</p>
-              <p>• {t('exerciseSessions.tip2')}</p>
-              <p>• {t('exerciseSessions.tip3')}</p>
-              <p>• {t('exerciseSessions.tip4')}</p>
-              <p>• {t('exerciseSessions.tip5')}</p>
-              <p>• {t('exerciseSessions.tip6')}</p>
-            </div>
-          </Card>
-        </Col>
+        {!isDetailMode && !isEditMode && (
+          <Col xs={24} lg={8}>
+            <Card title={t('exerciseSessions.tipsTitle')}>
+              <div style={{ color: '#666' }}>
+                <p><strong>{t('exerciseSessions.tipsTitle')}</strong></p>
+                <p>• {t('exerciseSessions.tip1')}</p>
+                <p>• {t('exerciseSessions.tip2')}</p>
+                <p>• {t('exerciseSessions.tip3')}</p>
+                <p>• {t('exerciseSessions.tip4')}</p>
+                <p>• {t('exerciseSessions.tip5')}</p>
+                <p>• {t('exerciseSessions.tip6')}</p>
+              </div>
+            </Card>
+          </Col>
+        )}
       </Row>
     </div>
   );

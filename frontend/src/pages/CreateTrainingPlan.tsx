@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Empty, Row, Col, InputNumber, Divider, List, Tag } from 'antd';
-import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, PlayCircleOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -298,16 +298,27 @@ const CreateTrainingPlan: React.FC = () => {
               </Text>
             </div>
           </div>
-          {(isDetailMode || isEditMode) && id && (
-            <Button 
-              type="primary" 
-              size="large"
-              icon={<PlayCircleOutlined />}
-              onClick={handleStartTraining}
-            >
-              {t('trainingPlans.startTraining')}
-            </Button>
-          )}
+          <Space>
+            {isDetailMode && id && (
+              <Button 
+                icon={<EditOutlined />}
+                onClick={() => navigate(`/training-plans/${id}/edit`)}
+                size="large"
+              >
+                {t('common.edit')}
+              </Button>
+            )}
+            {(isDetailMode || isEditMode) && id && (
+              <Button 
+                type="primary" 
+                size="large"
+                icon={<PlayCircleOutlined />}
+                onClick={handleStartTraining}
+              >
+                {t('trainingPlans.startTraining')}
+              </Button>
+            )}
+          </Space>
         </div>
       </div>
 
@@ -722,18 +733,20 @@ const CreateTrainingPlan: React.FC = () => {
           )}
         </Col>
 
-        <Col xs={24} lg={8}>
-          <Card title={t('trainingPlans.tipsTitle')}>
-            <div style={{ color: '#666' }}>
-              <p>• {t('trainingPlans.tip1')}</p>
-              <p>• {t('trainingPlans.tip2')}</p>
-              <p>• {t('trainingPlans.tip3')}</p>
-              <p>• {t('trainingPlans.tip4')}</p>
-              <p>• {t('trainingPlans.tip5')}</p>
-              <p>• {t('trainingPlans.tip6')}</p>
-            </div>
-          </Card>
-        </Col>
+        {!isDetailMode && !isEditMode && (
+          <Col xs={24} lg={8}>
+            <Card title={t('trainingPlans.tipsTitle')}>
+              <div style={{ color: '#666' }}>
+                <p>• {t('trainingPlans.tip1')}</p>
+                <p>• {t('trainingPlans.tip2')}</p>
+                <p>• {t('trainingPlans.tip3')}</p>
+                <p>• {t('trainingPlans.tip4')}</p>
+                <p>• {t('trainingPlans.tip5')}</p>
+                <p>• {t('trainingPlans.tip6')}</p>
+              </div>
+            </Card>
+          </Col>
+        )}
       </Row>
     </div>
   );
