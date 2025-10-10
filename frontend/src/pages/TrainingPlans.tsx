@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Input, Select, Button, Typography, Space, Tag, message, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, CalendarOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -143,6 +143,14 @@ const TrainingPlans: React.FC = () => {
                 className="plan-card"
                 hoverable
                 actions={[
+                    <Button
+                      key="view"
+                      type="text"
+                      icon={<EyeOutlined />}
+                      onClick={() => navigate(`/training-plans/${plan.id}`)}
+                    >
+                      {t('common.view')}
+                    </Button>,
                     <Button
                       key="edit"
                       type="text"

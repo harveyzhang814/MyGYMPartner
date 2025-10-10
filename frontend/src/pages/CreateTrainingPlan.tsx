@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker, Switch, Button, Card, Typography, Space, message, Empty, Row, Col, InputNumber, Divider, List, Tag } from 'antd';
-import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, PlayCircleOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
@@ -52,32 +52,22 @@ const CreateTrainingPlan: React.FC = () => {
   
   const [form] = Form.useForm<TrainingPlanForm>();
   const [selectedTrainingGroups, setSelectedTrainingGroups] = useState<string[]>([]);
-  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([
-    {
-      exerciseId: '',
-      sets: [{ reps: 10, weight: 0, restTime: 60, notes: '' }]
-    }
-  ]);
-  const [isDetailMode, setIsDetailMode] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
+  
+  // 根据路径判断页面模式
+  const isEditMode = location.pathname.includes('/edit');
+  const isDetailMode = Boolean(id) && !isEditMode;
 
   useEffect(() => {
-    // 判断页面模式
-    if (location.pathname.includes('/edit')) {
-      setIsEditMode(true);
-    } else if (location.pathname.includes('/') && id && !location.pathname.includes('/edit')) {
-      setIsDetailMode(true);
-    }
-
     // 加载训练组和动作数据
     dispatch(fetchTrainingGroups());
     dispatch(fetchExercises({ page: 1, limit: 100 }));
 
     // 如果是编辑或详情模式，加载训练计划数据
-    if (id && (isEditMode || isDetailMode)) {
+    if (id) {
       dispatch(fetchTrainingPlan(id));
     }
-  }, [dispatch, id, isEditMode, isDetailMode, location.pathname]);
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (currentTrainingPlan && (isEditMode || isDetailMode)) {
@@ -276,8 +266,8 @@ const CreateTrainingPlan: React.FC = () => {
     try {
       const session = await trainingPlanService.startTrainingFromPlan(id);
       message.success(t('trainingPlans.startTrainingSuccess'));
-      // 跳转到训练记录详情页
-      navigate(`/exercise-sessions/${session.id}`);
+      // 跳转到训练记录编辑页
+      navigate(`/exercise-sessions/${session.id}/edit`);
     } catch (error: any) {
       message.error(error.message || t('trainingPlans.startTrainingFailed'));
     }
@@ -303,16 +293,27 @@ const CreateTrainingPlan: React.FC = () => {
               </Text>
             </div>
           </div>
-          {isDetailMode && (
-            <Button 
-              type="primary" 
-              size="large"
-              icon={<PlayCircleOutlined />}
-              onClick={handleStartTraining}
-            >
-              {t('trainingPlans.startTraining')}
-            </Button>
-          )}
+          <Space>
+            {isDetailMode && id && (
+              <Button 
+                icon={<EditOutlined />}
+                onClick={() => navigate(`/training-plans/${id}/edit`)}
+                size="large"
+              >
+                {t('common.edit')}
+              </Button>
+            )}
+            {(isDetailMode || isEditMode) && id && (
+              <Button 
+                type="primary" 
+                size="large"
+                icon={<PlayCircleOutlined />}
+                onClick={handleStartTraining}
+              >
+                {t('trainingPlans.startTraining')}
+              </Button>
+            )}
+          </Space>
         </div>
       </div>
 
@@ -386,65 +387,33 @@ const CreateTrainingPlan: React.FC = () => {
               </Form.Item>
 
               <div style={{ marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div style={{ marginBottom: 16 }}>
                   <Text strong>{t('trainingPlans.trainingExercises')}</Text>
-                  {!isDetailMode && (
-                    <Button 
-                      type="dashed" 
-                      icon={<PlusOutlined />} 
-                      onClick={handleAddExercise}
-                    >
-                      {t('trainingPlans.addExerciseManually')}
-                    </Button>
-                  )}
                 </div>
 
-                {!isDetailMode && (
-                  <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <Text strong>{t('trainingPlans.importFromTrainingGroups')}</Text>
-                    </div>
-                    <Select
-                      mode="multiple"
-                      placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
-                      value={selectedTrainingGroups}
-                      onChange={setSelectedTrainingGroups}
-                      style={{ width: '100%', marginBottom: 12 }}
-                      loading={trainingGroupsLoading}
-                    >
-                      {trainingGroups.map((group) => (
-                        <Option key={group.id} value={group.id}>
-                          {group.name} - {group.exercise.nameZh || group.exercise.name}
-                        </Option>
-                      ))}
-                    </Select>
-                    <Button 
-                      type="primary" 
-                      icon={<ImportOutlined />}
-                      onClick={handleImportFromTrainingGroups}
-                      disabled={selectedTrainingGroups.length === 0}
-                    >
-                      {t('trainingPlans.addTrainingGroups')}
-                    </Button>
-                  </Card>
-                )}
-
-                <Divider />
-
-                {exerciseRecords.map((record, exerciseIndex) => (
+                {exerciseRecords.length === 0 && !isDetailMode ? (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="暂无训练动作，请通过下方添加"
+                    style={{ margin: '40px 0' }}
+                  />
+                ) : (
+                  exerciseRecords.map((record, exerciseIndex) => (
                   <Card 
                     key={exerciseIndex} 
                     size="small" 
                     style={{ marginBottom: 16 }}
                     title={`${t('trainingPlans.exerciseNumber').replace('{number}', String(exerciseIndex + 1))}`}
                     extra={
-                      !isDetailMode && exerciseRecords.length > 1 && (
+                      !isDetailMode && (
                         <Button 
                           type="text" 
                           danger 
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemoveExercise(exerciseIndex)}
-                        />
+                        >
+                          删除动作
+                        </Button>
                       )
                     }
                   >
@@ -621,14 +590,50 @@ const CreateTrainingPlan: React.FC = () => {
                       ))}
                     </div>
                   </Card>
-                ))}
+                ))
+                )}
 
-                {exerciseRecords.length === 0 && (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('trainingPlans.noExercises')}
-                    style={{ margin: '20px 0' }}
-                  />
+                <Divider />
+
+                {!isDetailMode && (
+                  <>
+                    <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
+                      <div style={{ marginBottom: 12 }}>
+                        <Text strong>{t('trainingPlans.importFromTrainingGroups')}</Text>
+                      </div>
+                      <Select
+                        mode="multiple"
+                        placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
+                        value={selectedTrainingGroups}
+                        onChange={setSelectedTrainingGroups}
+                        style={{ width: '100%', marginBottom: 12 }}
+                        loading={trainingGroupsLoading}
+                      >
+                        {trainingGroups.map((group) => (
+                          <Option key={group.id} value={group.id}>
+                            {group.name} - {group.exercise.nameZh || group.exercise.name}
+                          </Option>
+                        ))}
+                      </Select>
+                      <Button 
+                        type="primary" 
+                        icon={<ImportOutlined />}
+                        onClick={handleImportFromTrainingGroups}
+                        disabled={selectedTrainingGroups.length === 0}
+                      >
+                        {t('trainingPlans.addTrainingGroups')}
+                      </Button>
+                    </Card>
+
+                    <Button 
+                      type="dashed" 
+                      icon={<PlusOutlined />} 
+                      onClick={handleAddExercise}
+                      block
+                    >
+                      {t('trainingPlans.addExerciseManually')}
+                    </Button>
+                  </>
                 )}
               </div>
 
@@ -654,10 +659,12 @@ const CreateTrainingPlan: React.FC = () => {
               )}
             </Form>
           </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
           {isDetailMode && currentTrainingPlan?.exerciseSessions && currentTrainingPlan.exerciseSessions.length > 0 && (
             <Card 
               title={t('trainingPlans.relatedSessions')}
-              style={{ marginTop: 24 }}
               extra={
                 <Text type="secondary">
                   {t('trainingPlans.sessionCount').replace('{count}', String(currentTrainingPlan.exerciseSessions.length))}
@@ -687,7 +694,10 @@ const CreateTrainingPlan: React.FC = () => {
                             session.status === 'IN_PROGRESS' ? 'processing' : 
                             session.status === 'PAUSED' ? 'warning' : 'default'
                           }>
-                            {t(`exerciseSessions.${session.status.toLowerCase().replace('_', '')}`)}
+                            {session.status === 'IN_PROGRESS' ? t('exerciseSessions.inProgress') :
+                             session.status === 'COMPLETED' ? t('exerciseSessions.completed') :
+                             session.status === 'PAUSED' ? t('exerciseSessions.paused') :
+                             t('exerciseSessions.cancelled')}
                           </Tag>
                         </Space>
                       }
@@ -718,19 +728,19 @@ const CreateTrainingPlan: React.FC = () => {
               />
             </Card>
           )}
-        </Col>
-
-        <Col xs={24} lg={8}>
-          <Card title={t('trainingPlans.tipsTitle')}>
-            <div style={{ color: '#666' }}>
-              <p>• {t('trainingPlans.tip1')}</p>
-              <p>• {t('trainingPlans.tip2')}</p>
-              <p>• {t('trainingPlans.tip3')}</p>
-              <p>• {t('trainingPlans.tip4')}</p>
-              <p>• {t('trainingPlans.tip5')}</p>
-              <p>• {t('trainingPlans.tip6')}</p>
-            </div>
-          </Card>
+          
+          {!isDetailMode && !isEditMode && (
+            <Card title={t('trainingPlans.tipsTitle')}>
+              <div style={{ color: '#666' }}>
+                <p>• {t('trainingPlans.tip1')}</p>
+                <p>• {t('trainingPlans.tip2')}</p>
+                <p>• {t('trainingPlans.tip3')}</p>
+                <p>• {t('trainingPlans.tip4')}</p>
+                <p>• {t('trainingPlans.tip5')}</p>
+                <p>• {t('trainingPlans.tip6')}</p>
+              </div>
+            </Card>
+          )}
         </Col>
       </Row>
     </div>

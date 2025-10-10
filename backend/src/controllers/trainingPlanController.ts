@@ -455,6 +455,11 @@ export const deleteTrainingPlan = async (req: Request, res: Response): Promise<v
       return;
     }
 
+    // 删除训练计划的动作数据（级联删除会自动删除sets）
+    await prisma.trainingPlanExercise.deleteMany({
+      where: { trainingPlanId: id }
+    });
+
     // 软删除训练计划
     await prisma.trainingPlan.update({
       where: { id },
@@ -465,11 +470,12 @@ export const deleteTrainingPlan = async (req: Request, res: Response): Promise<v
       success: true,
       message: 'Training plan deleted successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete training plan error:', error);
+    console.error('Error message:', error.message);
     res.status(500).json({
       success: false,
-      error: 'Failed to delete training plan'
+      error: error.message || 'Failed to delete training plan'
     });
   }
 };
