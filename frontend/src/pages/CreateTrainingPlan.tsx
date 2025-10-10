@@ -686,7 +686,10 @@ const CreateTrainingPlan: React.FC = () => {
                             session.status === 'IN_PROGRESS' ? 'processing' : 
                             session.status === 'PAUSED' ? 'warning' : 'default'
                           }>
-                            {t(`exerciseSessions.${session.status.toLowerCase().replace('_', '')}`)}
+                            {session.status === 'IN_PROGRESS' ? t('exerciseSessions.inProgress') :
+                             session.status === 'COMPLETED' ? t('exerciseSessions.completed') :
+                             session.status === 'PAUSED' ? t('exerciseSessions.paused') :
+                             t('exerciseSessions.cancelled')}
                           </Tag>
                         </Space>
                       }
