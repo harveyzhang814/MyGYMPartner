@@ -37,7 +37,7 @@ const SecureAvatar: React.FC<SecureAvatarProps> = ({
     };
 
     fetchAvatar();
-  }, [targetUserId]);
+  }, [targetUserId, user?.avatarUrl]);
 
   return (
     <Avatar
