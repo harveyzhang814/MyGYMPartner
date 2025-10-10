@@ -271,8 +271,8 @@ const CreateTrainingPlan: React.FC = () => {
     try {
       const session = await trainingPlanService.startTrainingFromPlan(id);
       message.success(t('trainingPlans.startTrainingSuccess'));
-      // 跳转到训练记录详情页
-      navigate(`/exercise-sessions/${session.id}`);
+      // 跳转到训练记录编辑页
+      navigate(`/exercise-sessions/${session.id}/edit`);
     } catch (error: any) {
       message.error(error.message || t('trainingPlans.startTrainingFailed'));
     }
