@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Input, Select, Button, Typography, Space, Tag, message, Popconfirm } from 'antd';
-import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { SearchOutlined, StarOutlined, StarFilled, FilterOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, ImportOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { fetchExercises, addToFavorites, removeFromFavorites, deleteExercise } from '../store/slices/exerciseSlice';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getPresetOptions } from '../locales';
+import ImportExercisesModal from '../components/ImportExercisesModal';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -22,6 +23,7 @@ const Exercises: React.FC = () => {
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string | undefined>();
   const [selectedEquipment, setSelectedEquipment] = useState<string | undefined>();
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>();
+  const [importModalVisible, setImportModalVisible] = useState(false);
 
   useEffect(() => {
     dispatch(fetchExercises());
@@ -63,6 +65,10 @@ const Exercises: React.FC = () => {
     }
   };
 
+  const handleImportSuccess = () => {
+    dispatch(fetchExercises());
+  };
+
   // 使用多语言预设选项，响应语言变化
   const muscleGroupOptions = getPresetOptions('muscleGroups', language);
   const equipmentOptions = getPresetOptions('equipment', language);
@@ -76,14 +82,23 @@ const Exercises: React.FC = () => {
             <Title level={2} className="page-title">{t('exercises.title')}</Title>
             <Text className="page-description">{t('exercises.description')}</Text>
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/exercises/create')}
-            size="large"
-          >
-            {t('exercises.createExercise')}
-          </Button>
+          <Space>
+            <Button
+              icon={<ImportOutlined />}
+              onClick={() => setImportModalVisible(true)}
+              size="large"
+            >
+              {t('exercises.importExercises')}
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/exercises/create')}
+              size="large"
+            >
+              {t('exercises.createExercise')}
+            </Button>
+          </Space>
         </div>
       </div>
 
@@ -265,6 +280,13 @@ const Exercises: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Import Modal */}
+      <ImportExercisesModal
+        visible={importModalVisible}
+        onCancel={() => setImportModalVisible(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 };
