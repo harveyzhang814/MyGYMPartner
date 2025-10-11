@@ -1,5 +1,5 @@
 import api from './api';
-import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest } from '../types';
+import { Exercise, PaginatedResponse, PaginationParams, CreateExerciseRequest, BatchCreateExerciseRequest, BatchCreateExerciseResponse } from '../types';
 
 export const exerciseService = {
   // Get exercises
@@ -58,6 +58,12 @@ export const exerciseService = {
   // Get exercise templates
   getExerciseTemplates: async (): Promise<Exercise[]> => {
     const response = await api.get<{ success: boolean; data: Exercise[] }>('/exercises/templates');
+    return response.data.data;
+  },
+
+  // Batch create exercises
+  batchCreateExercises: async (exercisesData: BatchCreateExerciseRequest): Promise<BatchCreateExerciseResponse> => {
+    const response = await api.post<{ success: boolean; data: BatchCreateExerciseResponse; message: string }>('/exercises/batch', exercisesData);
     return response.data.data;
   }
 };

@@ -103,6 +103,18 @@ export interface ExerciseSearchParams extends PaginationParams {
   createdBy?: string;
 }
 
+export interface BatchCreateExerciseRequest extends Array<CreateExerciseRequest> {}
+
+export interface BatchCreateExerciseResponse {
+  success: number;
+  failed: number;
+  errors: Array<{
+    index: number;
+    name: string;
+    error: string;
+  }>;
+}
+
 // Training Plan types
 export interface TrainingPlan {
   id: string;

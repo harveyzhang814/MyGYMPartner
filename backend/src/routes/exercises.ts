@@ -8,7 +8,8 @@ import {
   createExercise,
   updateExercise,
   deleteExercise,
-  getExerciseTemplates
+  getExerciseTemplates,
+  batchCreateExercises
 } from '../controllers/exerciseController';
 import { authenticate } from '../middleware/auth';
 
@@ -21,6 +22,7 @@ router.get('/:id', getExercise);
 
 // Protected routes
 router.use(authenticate);
+router.post('/batch', batchCreateExercises);
 router.post('/', createExercise);
 router.put('/:id', updateExercise);
 router.delete('/:id', deleteExercise);

@@ -450,3 +450,187 @@ export const getExerciseTemplates = async (req: Request, res: Response): Promise
     });
   }
 };
+
+// 批量创建动作
+export const batchCreateExercises = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+    const exercisesData: CreateExerciseRequest[] = req.body;
+
+    // 验证输入是否为数组
+    if (!Array.isArray(exercisesData)) {
+      res.status(400).json({
+        success: false,
+        error: 'Request body must be an array of exercises'
+      });
+      return;
+    }
+
+    // 定义有效值常量
+    const VALID_MUSCLE_GROUPS = [
+      'chest-upper', 'chest-middle', 'chest-lower',
+      'back-lats', 'back-upper-traps', 'back-middle-traps', 'back-lower-traps', 
+      'back-rhomboids', 'back-erector-spinae', 'back-teres-major', 'back-teres-minor',
+      'back-infraspinatus', 'back-supraspinatus',
+      'shoulders-front-deltoid', 'shoulders-lateral-deltoid', 'shoulders-rear-deltoid',
+      'arms-biceps-long-head', 'arms-biceps-short-head', 'arms-brachialis', 'arms-brachioradialis',
+      'arms-triceps-long-head', 'arms-triceps-lateral-head', 'arms-triceps-medial-head',
+      'forearms-flexors', 'forearms-extensors',
+      'legs-quadriceps', 'legs-hamstrings', 'legs-gluteus-maximus', 'legs-gluteus-medius', 'legs-gluteus-minimus',
+      'legs-calf-gastrocnemius', 'legs-calf-soleus',
+      'core-rectus-abdominis', 'core-external-obliques', 'core-internal-obliques', 'core-transverse-abdominis', 'core-iliopsoas',
+      'neck-sternocleidomastoid', 'neck-scalenes'
+    ];
+
+    const VALID_EQUIPMENT = [
+      'bodyweight', 'dumbbell', 'barbell', 'kettlebell', 'resistanceBand', 
+      'cable', 'machine', 'bench', 'pullUpBar', 'medicineBall', 'trx', 'other'
+    ];
+
+    const VALID_DIFFICULTY = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
+
+    const VALID_CATEGORIES = [
+      'strength', 'cardio', 'flexibility', 'balance', 'plyometric', 'mobility', 'rehabilitation'
+    ];
+
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as Array<{ index: number; name: string; error: string }>
+    };
+
+    // 逐个创建动作
+    for (let i = 0; i < exercisesData.length; i++) {
+      const exerciseData = exercisesData[i];
+      
+      try {
+        // 验证必填字段
+        if (!exerciseData.name || typeof exerciseData.name !== 'string' || exerciseData.name.trim() === '') {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name || 'Unknown',
+            error: 'Missing or invalid required field: name'
+          });
+          continue;
+        }
+
+        if (!exerciseData.muscleGroups || !Array.isArray(exerciseData.muscleGroups) || exerciseData.muscleGroups.length === 0) {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name,
+            error: 'Missing or invalid required field: muscleGroups (must be a non-empty array)'
+          });
+          continue;
+        }
+
+        // 验证 muscleGroups 中的每个值
+        const invalidMuscleGroups = exerciseData.muscleGroups.filter(mg => !VALID_MUSCLE_GROUPS.includes(mg));
+        if (invalidMuscleGroups.length > 0) {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name,
+            error: `Invalid muscle groups: ${invalidMuscleGroups.join(', ')}`
+          });
+          continue;
+        }
+
+        // 验证 equipment
+        if (exerciseData.equipment && !VALID_EQUIPMENT.includes(exerciseData.equipment)) {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name,
+            error: `Invalid equipment: ${exerciseData.equipment}. Must be one of: ${VALID_EQUIPMENT.join(', ')}`
+          });
+          continue;
+        }
+
+        // 验证 difficultyLevel
+        if (exerciseData.difficultyLevel && !VALID_DIFFICULTY.includes(exerciseData.difficultyLevel)) {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name,
+            error: `Invalid difficultyLevel: ${exerciseData.difficultyLevel}. Must be one of: ${VALID_DIFFICULTY.join(', ')}`
+          });
+          continue;
+        }
+
+        // 验证 category
+        if (exerciseData.category && !VALID_CATEGORIES.includes(exerciseData.category)) {
+          results.failed++;
+          results.errors.push({
+            index: i,
+            name: exerciseData.name,
+            error: `Invalid category: ${exerciseData.category}. Must be one of: ${VALID_CATEGORIES.join(', ')}`
+          });
+          continue;
+        }
+
+        // 准备数据，过滤空值和无效字段
+        const cleanData: any = {
+          name: exerciseData.name.trim(),
+          muscleGroups: exerciseData.muscleGroups,
+          createdBy: userId,
+          instructions: Array.isArray(exerciseData.instructions) ? exerciseData.instructions : [],
+          instructionsZh: Array.isArray(exerciseData.instructionsZh) ? exerciseData.instructionsZh : [],
+          // 默认设置为公开和模板动作
+          isTemplate: exerciseData.isTemplate !== undefined ? exerciseData.isTemplate : true,
+          isPublic: exerciseData.isPublic !== undefined ? exerciseData.isPublic : true
+        };
+
+        // 添加可选字段（跳过空值）
+        if (exerciseData.nameZh && exerciseData.nameZh.trim()) {
+          cleanData.nameZh = exerciseData.nameZh.trim();
+        }
+        if (exerciseData.description && exerciseData.description.trim()) {
+          cleanData.description = exerciseData.description.trim();
+        }
+        if (exerciseData.descriptionZh && exerciseData.descriptionZh.trim()) {
+          cleanData.descriptionZh = exerciseData.descriptionZh.trim();
+        }
+        if (exerciseData.equipment && exerciseData.equipment.trim()) {
+          cleanData.equipment = exerciseData.equipment.trim();
+        }
+        if (exerciseData.difficultyLevel) {
+          cleanData.difficultyLevel = exerciseData.difficultyLevel;
+        }
+        if (exerciseData.category && exerciseData.category.trim()) {
+          cleanData.category = exerciseData.category.trim();
+        }
+        if (exerciseData.gifUrl && exerciseData.gifUrl.trim()) {
+          cleanData.gifUrl = exerciseData.gifUrl.trim();
+        }
+
+        // 创建动作
+        await prisma.exercise.create({
+          data: cleanData
+        });
+
+        results.success++;
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push({
+          index: i,
+          name: exerciseData.name || 'Unknown',
+          error: error.message || 'Failed to create exercise'
+        });
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      data: results,
+      message: `Batch import completed: ${results.success} succeeded, ${results.failed} failed`
+    });
+  } catch (error) {
+    console.error('Batch create exercises error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to batch create exercises'
+    });
+  }
+};
