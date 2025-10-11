@@ -16,7 +16,10 @@ const ExerciseSessions: React.FC = () => {
   const { t } = useLanguage();
 
   useEffect(() => {
-    dispatch(fetchExerciseSessions());
+    dispatch(fetchExerciseSessions({
+      sortBy: 'sessionDate',
+      sortOrder: 'desc'
+    }));
   }, [dispatch]);
 
   const handleDelete = async (id: string) => {
@@ -159,19 +162,22 @@ const ExerciseSessions: React.FC = () => {
           ))}
         </Row>
       ) : (
-        <div className="empty-container">
+        <div className="empty-container empty-container-vertical">
           <div className="empty-icon">
             <TrophyOutlined />
           </div>
-          <div className="empty-title">{t('exerciseSessions.noSessions')}</div>
-          <div className="empty-description">{t('exerciseSessions.startFirstSession')}</div>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/exercise-sessions/create')}
-          >
-            {t('exerciseSessions.startTraining')}
-          </Button>
+          <div className="empty-content">
+            <div className="empty-title">{t('exerciseSessions.noSessions')}</div>
+            <div className="empty-description">{t('exerciseSessions.startFirstSession')}</div>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/exercise-sessions/create')}
+              className="empty-action-button"
+            >
+              {t('exerciseSessions.startTraining')}
+            </Button>
+          </div>
         </div>
       )}
     </div>

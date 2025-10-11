@@ -134,19 +134,22 @@ const TrainingGroups: React.FC = () => {
           ))}
         </Row>
       ) : (
-        <div className="empty-container">
+        <div className="empty-container empty-container-vertical">
           <div className="empty-icon">
             <PlusOutlined />
           </div>
-          <div className="empty-title">{t('trainingGroups.noTrainingGroups')}</div>
-          <div className="empty-description">{t('trainingGroups.createFirstGroup')}</div>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/training-groups/create')}
-          >
-            {t('trainingGroups.createTrainingGroup')}
-          </Button>
+          <div className="empty-content">
+            <div className="empty-title">{t('trainingGroups.noTrainingGroups')}</div>
+            <div className="empty-description">{t('trainingGroups.createFirstGroup')}</div>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/training-groups/create')}
+              className="empty-action-button"
+            >
+              {t('trainingGroups.createTrainingGroup')}
+            </Button>
+          </div>
         </div>
       )}
     </div>

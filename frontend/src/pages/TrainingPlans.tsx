@@ -29,7 +29,9 @@ const TrainingPlans: React.FC = () => {
       page: currentPage,
       limit: 10,
       search: searchText || undefined,
-      status: statusFilter || undefined
+      status: statusFilter || undefined,
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
     }));
   }, [dispatch, currentPage, searchText, statusFilter]);
 
@@ -228,19 +230,22 @@ const TrainingPlans: React.FC = () => {
           ))}
         </Row>
       ) : (
-        <div className="empty-container">
+        <div className="empty-container empty-container-vertical">
           <div className="empty-icon">
             <CalendarOutlined />
           </div>
-          <div className="empty-title">{t('trainingPlans.noTrainingPlans')}</div>
-          <div className="empty-description">{t('trainingPlans.createFirstPlanDescription')}</div>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/training-plans/create')}
-          >
-            {t('trainingPlans.createTrainingPlan')}
-          </Button>
+          <div className="empty-content">
+            <div className="empty-title">{t('trainingPlans.noTrainingPlans')}</div>
+            <div className="empty-description">{t('trainingPlans.createFirstPlanDescription')}</div>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/training-plans/create')}
+              className="empty-action-button"
+            >
+              {t('trainingPlans.createTrainingPlan')}
+            </Button>
+          </div>
         </div>
       )}
     </div>
