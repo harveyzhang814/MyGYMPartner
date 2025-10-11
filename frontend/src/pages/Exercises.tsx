@@ -242,24 +242,27 @@ const Exercises: React.FC = () => {
           ))}
         </Row>
       ) : (
-        <div className="empty-container">
+        <div className="empty-container empty-container-vertical">
           <div className="empty-icon">
             <SearchOutlined />
           </div>
-          <div className="empty-title">未找到相关动作</div>
-          <div className="empty-description">尝试调整搜索条件或浏览所有动作</div>
-          <Button 
-            type="primary" 
-            onClick={() => {
-              setSearchTerm('');
-              setSelectedMuscleGroup(undefined);
-              setSelectedEquipment(undefined);
-              setSelectedDifficulty(undefined);
-              dispatch(fetchExercises());
-            }}
-          >
-            显示所有动作
-          </Button>
+          <div className="empty-content">
+            <div className="empty-title">未找到相关动作</div>
+            <div className="empty-description">尝试调整搜索条件或浏览所有动作</div>
+            <Button 
+              type="primary" 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedMuscleGroup(undefined);
+                setSelectedEquipment(undefined);
+                setSelectedDifficulty(undefined);
+                dispatch(fetchExercises());
+              }}
+              className="empty-action-button"
+            >
+              显示所有动作
+            </Button>
+          </div>
         </div>
       )}
     </div>

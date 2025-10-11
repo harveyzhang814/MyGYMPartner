@@ -14,9 +14,6 @@ import exerciseSessionRoutes from './routes/exerciseSessions';
 import exerciseRoutes from './routes/exercises';
 import trainingPlanRoutes from './routes/trainingPlans';
 
-// Import controllers for initialization
-import { initializeBasicExercises } from './controllers/exerciseController';
-
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
@@ -120,9 +117,6 @@ const server = app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  
-  // Initialize basic exercises
-  await initializeBasicExercises();
 });
 
 // Graceful shutdown

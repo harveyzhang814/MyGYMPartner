@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { prisma } from '../index';
-import { basicExercises } from '../utils/basicExercises';
 import { CreateExerciseRequest, UpdateExerciseRequest } from '../types';
 
 export const getExercises = async (req: Request, res: Response): Promise<void> => {
@@ -449,26 +448,5 @@ export const getExerciseTemplates = async (req: Request, res: Response): Promise
       success: false,
       error: 'Failed to get exercise templates'
     });
-  }
-};
-
-// 初始化基础动作数据
-export const initializeBasicExercises = async () => {
-  try {
-    const existingCount = await prisma.exercise.count();
-    
-    if (existingCount === 0) {
-      console.log('Initializing basic exercises...');
-      
-      for (const exercise of basicExercises) {
-        await prisma.exercise.create({
-          data: exercise as any
-        });
-      }
-      
-      console.log(`Initialized ${basicExercises.length} basic exercises`);
-    }
-  } catch (error) {
-    console.error('Error initializing basic exercises:', error);
   }
 };

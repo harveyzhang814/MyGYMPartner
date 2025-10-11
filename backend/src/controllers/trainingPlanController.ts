@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export const getTrainingPlans = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
-    const { page = 1, limit = 10, search, status } = req.query;
+    const { page = 1, limit = 10, search, status, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
     console.log('Fetching training plans for user:', userId);
 
@@ -55,7 +55,7 @@ export const getTrainingPlans = async (req: Request, res: Response): Promise<voi
             }
           }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortBy as string]: sortOrder },
         skip,
         take: Number(limit)
       }),

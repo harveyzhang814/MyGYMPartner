@@ -226,7 +226,10 @@ const CreateTrainingPlan: React.FC = () => {
 
   const handleAddSet = (exerciseIndex: number) => {
     const newRecords = [...exerciseRecords];
-    newRecords[exerciseIndex].sets.push({ reps: 10, weight: 0, restTime: 60, notes: '' });
+    const currentSets = newRecords[exerciseIndex].sets;
+    // 复制上一组的内容，如果没有上一组则使用默认值
+    const lastSet = currentSets.length > 0 ? currentSets[currentSets.length - 1] : { reps: 10, weight: 0, restTime: 60, notes: '' };
+    newRecords[exerciseIndex].sets.push({ ...lastSet });
     setExerciseRecords(newRecords);
   };
 
@@ -266,8 +269,12 @@ const CreateTrainingPlan: React.FC = () => {
     try {
       const session = await trainingPlanService.startTrainingFromPlan(id);
       message.success(t('trainingPlans.startTrainingSuccess'));
-      // 跳转到训练记录编辑页
-      navigate(`/exercise-sessions/${session.id}/edit`);
+      // 跳转到训练记录编辑页，并传递训练计划信息
+      navigate(`/exercise-sessions/${session.id}/edit`, {
+        state: {
+          trainingPlan: currentTrainingPlan
+        }
+      });
     } catch (error: any) {
       message.error(error.message || t('trainingPlans.startTrainingFailed'));
     }
@@ -402,8 +409,17 @@ const CreateTrainingPlan: React.FC = () => {
                   <Card 
                     key={exerciseIndex} 
                     size="small" 
-                    style={{ marginBottom: 16 }}
-                    title={`${t('trainingPlans.exerciseNumber').replace('{number}', String(exerciseIndex + 1))}`}
+                    className="exercise-card-wrapper"
+                    title={
+                      <span>
+                        {`${t('trainingPlans.exerciseNumber').replace('{number}', String(exerciseIndex + 1))}`}
+                        {record.trainingGroupId && (
+                          <Tag icon={<ImportOutlined />} color="blue" style={{ marginLeft: 8 }}>
+                            来自训练组
+                          </Tag>
+                        )}
+                      </span>
+                    }
                     extra={
                       !isDetailMode && (
                         <Button 
@@ -417,177 +433,168 @@ const CreateTrainingPlan: React.FC = () => {
                       )
                     }
                   >
-                    <Row gutter={16} style={{ marginBottom: 16 }}>
-                      <Col span={24}>
-                        <Text>{t('trainingPlans.selectExercise')}</Text>
-                        {isDetailMode ? (
-                          <div style={{ 
-                            padding: '8px 12px', 
-                            marginTop: 4,
-                            backgroundColor: '#f5f5f5', 
-                            borderRadius: '6px',
-                            border: '1px solid #d9d9d9'
-                          }}>
-                            {exercises.find(e => e.id === record.exerciseId)?.nameZh || 
-                             exercises.find(e => e.id === record.exerciseId)?.name || 
-                             '未选择动作'}
-                          </div>
-                        ) : (
-                          <Select
-                            placeholder={t('trainingPlans.selectExercisePlaceholder')}
-                            value={record.exerciseId}
-                            onChange={(value) => handleExerciseChange(exerciseIndex, 'exerciseId', value)}
-                            style={{ width: '100%', marginTop: 4 }}
-                            loading={exercisesLoading}
-                            showSearch
-                            filterOption={(input, option) =>
-                              String(option?.children || '').toLowerCase().includes(input.toLowerCase())
-                            }
-                          >
-                            {exercises.map((exercise) => (
-                              <Option key={exercise.id} value={exercise.id}>
-                                {exercise.nameZh || exercise.name}
-                              </Option>
-                            ))}
-                          </Select>
-                        )}
-                      </Col>
-                    </Row>
-                    
-                    {record.trainingGroupId && (
-                      <div style={{ marginBottom: 16, padding: 8, backgroundColor: '#e6f7ff', borderRadius: 4 }}>
-                        <Text type="secondary">
-                          <ImportOutlined /> {t('trainingPlans.fromTrainingGroup')}: {trainingGroups.find(g => g.id === record.trainingGroupId)?.name}
-                        </Text>
-                      </div>
-                    )}
-
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <Text strong>{t('trainingPlans.trainingSets')}</Text>
-                        {!isDetailMode && (
-                          <Button 
-                            type="dashed" 
-                            size="small"
-                            icon={<PlusOutlined />} 
-                            onClick={() => handleAddSet(exerciseIndex)}
-                          >
-                            {t('trainingPlans.addSet')}
-                          </Button>
-                        )}
-                      </div>
-
-                      {record.sets.map((set, setIndex) => (
-                        <Card 
-                          key={setIndex} 
-                          size="small" 
-                          style={{ marginBottom: 8 }}
-                          title={`${t('trainingPlans.set')} ${setIndex + 1}`}
-                          extra={
-                            !isDetailMode && record.sets.length > 1 && (
-                              <Button 
-                                type="text" 
-                                danger 
-                                size="small"
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
-                              />
-                            )
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <Text style={{ minWidth: 80 }}>{t('trainingPlans.selectExercise')}</Text>
+                      {isDetailMode ? (
+                        <div style={{ 
+                          padding: '8px 12px', 
+                          backgroundColor: '#f5f5f5', 
+                          borderRadius: '6px',
+                          border: '1px solid #d9d9d9',
+                          flex: 1
+                        }}>
+                          {exercises.find(e => e.id === record.exerciseId)?.nameZh || 
+                           exercises.find(e => e.id === record.exerciseId)?.name || 
+                           '未选择动作'}
+                        </div>
+                      ) : (
+                        <Select
+                          placeholder={t('trainingPlans.selectExercisePlaceholder')}
+                          value={record.exerciseId}
+                          onChange={(value) => handleExerciseChange(exerciseIndex, 'exerciseId', value)}
+                          style={{ flex: 1 }}
+                          loading={exercisesLoading}
+                          showSearch
+                          filterOption={(input, option) =>
+                            String(option?.children || '').toLowerCase().includes(input.toLowerCase())
                           }
                         >
-                          <Row gutter={16}>
-                            <Col span={6}>
-                              <Text>{t('trainingPlans.reps')}</Text>
-                              {isDetailMode ? (
-                                <div style={{ 
-                                  padding: '8px 12px', 
-                                  marginTop: 4,
-                                  backgroundColor: '#f5f5f5', 
-                                  borderRadius: '6px',
-                                  border: '1px solid #d9d9d9'
-                                }}>
-                                  {set.reps}
-                                </div>
-                              ) : (
-                                <InputNumber
-                                  min={1}
-                                  max={100}
-                                  value={set.reps}
-                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'reps', value || 0)}
-                                  style={{ width: '100%', marginTop: 4 }}
-                                />
-                              )}
-                            </Col>
-                            <Col span={6}>
-                              <Text>{t('trainingPlans.weight')} (kg)</Text>
-                              {isDetailMode ? (
-                                <div style={{ 
-                                  padding: '8px 12px', 
-                                  marginTop: 4,
-                                  backgroundColor: '#f5f5f5', 
-                                  borderRadius: '6px',
-                                  border: '1px solid #d9d9d9'
-                                }}>
-                                  {set.weight}
-                                </div>
-                              ) : (
-                                <InputNumber
-                                  min={0}
-                                  max={1000}
-                                  step={0.5}
-                                  value={set.weight}
-                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'weight', value || 0)}
-                                  style={{ width: '100%', marginTop: 4 }}
-                                />
-                              )}
-                            </Col>
-                            <Col span={6}>
-                              <Text>{t('trainingPlans.restTime')} (秒)</Text>
-                              {isDetailMode ? (
-                                <div style={{ 
-                                  padding: '8px 12px', 
-                                  marginTop: 4,
-                                  backgroundColor: '#f5f5f5', 
-                                  borderRadius: '6px',
-                                  border: '1px solid #d9d9d9'
-                                }}>
-                                  {set.restTime}
-                                </div>
-                              ) : (
-                                <InputNumber
-                                  min={0}
-                                  max={600}
-                                  value={set.restTime}
-                                  onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'restTime', value || 60)}
-                                  style={{ width: '100%', marginTop: 4 }}
-                                />
-                              )}
-                            </Col>
-                            <Col span={6}>
-                              <Text>{t('trainingPlans.notes')}</Text>
-                              {isDetailMode ? (
-                                <div style={{ 
-                                  padding: '8px 12px', 
-                                  marginTop: 4,
-                                  backgroundColor: '#f5f5f5', 
-                                  borderRadius: '6px',
-                                  border: '1px solid #d9d9d9',
-                                  minHeight: '32px'
-                                }}>
-                                  {set.notes || '-'}
-                                </div>
-                              ) : (
-                                <Input
-                                  placeholder={t('trainingPlans.notesPlaceholder')}
-                                  value={set.notes}
-                                  onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
-                                  style={{ width: '100%', marginTop: 4 }}
-                                />
-                              )}
-                            </Col>
-                          </Row>
-                        </Card>
+                          {exercises.map((exercise) => (
+                            <Option key={exercise.id} value={exercise.id}>
+                              {exercise.nameZh || exercise.name}
+                            </Option>
+                          ))}
+                        </Select>
+                      )}
+                    </div>
+                    
+                    <div style={{ marginBottom: 16 }}>
+
+                      {record.sets.map((set, setIndex) => (
+                        <div key={setIndex} className="training-set-card-inline">
+                          <span className="training-set-number">组{setIndex + 1}</span>
+                          <div className="training-set-fields">
+                            <div className="training-set-field">
+                              <span className="field-label">{t('trainingPlans.weight')} (kg)</span>
+                              <div className="field-input">
+                                {isDetailMode ? (
+                                  <div style={{ 
+                                    padding: '6px 8px', 
+                                    backgroundColor: '#f5f5f5', 
+                                    borderRadius: '4px',
+                                    border: '1px solid #d9d9d9',
+                                    fontSize: '13px'
+                                  }}>
+                                    {set.weight}
+                                  </div>
+                                ) : (
+                                  <InputNumber
+                                    min={0}
+                                    max={1000}
+                                    step={0.5}
+                                    value={set.weight}
+                                    onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'weight', value || 0)}
+                                    size="small"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            <div className="training-set-field">
+                              <span className="field-label">{t('trainingPlans.reps')}</span>
+                              <div className="field-input">
+                                {isDetailMode ? (
+                                  <div style={{ 
+                                    padding: '6px 8px', 
+                                    backgroundColor: '#f5f5f5', 
+                                    borderRadius: '4px',
+                                    border: '1px solid #d9d9d9',
+                                    fontSize: '13px'
+                                  }}>
+                                    {set.reps}
+                                  </div>
+                                ) : (
+                                  <InputNumber
+                                    min={1}
+                                    max={100}
+                                    value={set.reps}
+                                    onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'reps', value || 0)}
+                                    size="small"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            <div className="training-set-field">
+                              <span className="field-label">{t('trainingPlans.restTime')} (秒)</span>
+                              <div className="field-input">
+                                {isDetailMode ? (
+                                  <div style={{ 
+                                    padding: '6px 8px', 
+                                    backgroundColor: '#f5f5f5', 
+                                    borderRadius: '4px',
+                                    border: '1px solid #d9d9d9',
+                                    fontSize: '13px'
+                                  }}>
+                                    {set.restTime}
+                                  </div>
+                                ) : (
+                                  <InputNumber
+                                    min={0}
+                                    max={600}
+                                    value={set.restTime}
+                                    onChange={(value) => handleSetChange(exerciseIndex, setIndex, 'restTime', value || 60)}
+                                    size="small"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            <div className="training-set-field">
+                              <span className="field-label">{t('trainingPlans.notes')}</span>
+                              <div className="field-input">
+                                {isDetailMode ? (
+                                  <div style={{ 
+                                    padding: '6px 8px', 
+                                    backgroundColor: '#f5f5f5', 
+                                    borderRadius: '4px',
+                                    border: '1px solid #d9d9d9',
+                                    fontSize: '13px',
+                                    minHeight: '24px'
+                                  }}>
+                                    {set.notes || '-'}
+                                  </div>
+                                ) : (
+                                  <Input
+                                    placeholder={t('trainingPlans.notesPlaceholder')}
+                                    value={set.notes}
+                                    onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'notes', e.target.value)}
+                                    size="small"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          {!isDetailMode && record.sets.length > 1 && (
+                            <Button 
+                              type="text" 
+                              danger 
+                              size="small"
+                              icon={<DeleteOutlined />}
+                              onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
+                            />
+                          )}
+                        </div>
                       ))}
+                      
+                      {!isDetailMode && (
+                        <Button 
+                          type="dashed" 
+                          size="small"
+                          icon={<PlusOutlined />} 
+                          onClick={() => handleAddSet(exerciseIndex)}
+                          style={{ width: '100%', marginTop: 8 }}
+                        >
+                          {t('trainingPlans.addSet')}
+                        </Button>
+                      )}
                     </div>
                   </Card>
                 ))
@@ -597,33 +604,39 @@ const CreateTrainingPlan: React.FC = () => {
 
                 {!isDetailMode && (
                   <>
-                    <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
+                    <div className="import-section">
                       <div style={{ marginBottom: 12 }}>
                         <Text strong>{t('trainingPlans.importFromTrainingGroups')}</Text>
                       </div>
-                      <Select
-                        mode="multiple"
-                        placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
-                        value={selectedTrainingGroups}
-                        onChange={setSelectedTrainingGroups}
-                        style={{ width: '100%', marginBottom: 12 }}
-                        loading={trainingGroupsLoading}
-                      >
-                        {trainingGroups.map((group) => (
-                          <Option key={group.id} value={group.id}>
-                            {group.name} - {group.exercise.nameZh || group.exercise.name}
-                          </Option>
-                        ))}
-                      </Select>
-                      <Button 
-                        type="primary" 
-                        icon={<ImportOutlined />}
-                        onClick={handleImportFromTrainingGroups}
-                        disabled={selectedTrainingGroups.length === 0}
-                      >
-                        {t('trainingPlans.addTrainingGroups')}
-                      </Button>
-                    </Card>
+                      <Row gutter={16} align="middle">
+                        <Col flex="1" style={{ minWidth: 0 }}>
+                          <Select
+                            mode="multiple"
+                            placeholder={t('trainingPlans.selectTrainingGroupsToImport')}
+                            value={selectedTrainingGroups}
+                            onChange={setSelectedTrainingGroups}
+                            loading={trainingGroupsLoading}
+                            style={{ width: '100%' }}
+                          >
+                            {trainingGroups.map((group) => (
+                              <Option key={group.id} value={group.id}>
+                                {group.name} - {group.exercise.nameZh || group.exercise.name}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Col>
+                        <Col flex="none">
+                          <Button 
+                            type="primary" 
+                            icon={<ImportOutlined />}
+                            onClick={handleImportFromTrainingGroups}
+                            disabled={selectedTrainingGroups.length === 0}
+                          >
+                            导入
+                          </Button>
+                        </Col>
+                      </Row>
+                    </div>
 
                     <Button 
                       type="dashed" 

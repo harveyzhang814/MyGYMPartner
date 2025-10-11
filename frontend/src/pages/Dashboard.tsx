@@ -205,19 +205,22 @@ const Dashboard: React.FC = () => {
                 )}
               />
             ) : (
-              <div className="empty-container">
+              <div className="empty-container empty-container-vertical">
                 <div className="empty-icon">
                   <TrophyOutlined />
                 </div>
-                <div className="empty-title">{t('dashboard.noTrainingRecords')}</div>
-                <div className="empty-description">{t('dashboard.startFirstTraining')}</div>
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => navigate('/exercise-sessions')}
-                >
-                  {t('dashboard.startTraining')}
-                </Button>
+                <div className="empty-content">
+                  <div className="empty-title">{t('dashboard.noTrainingRecords')}</div>
+                  <div className="empty-description">{t('dashboard.startFirstTraining')}</div>
+                  <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />}
+                    onClick={() => navigate('/exercise-sessions')}
+                    className="empty-action-button"
+                  >
+                    {t('dashboard.startTraining')}
+                  </Button>
+                </div>
               </div>
             )}
           </Card>
